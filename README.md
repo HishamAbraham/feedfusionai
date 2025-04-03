@@ -68,9 +68,3 @@ feedfusionai/
 - Node.js and npm
 - Docker and Docker Compose
 - A running MongoDB instance (or use Docker to run one)
-
-### Backend Setup
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
