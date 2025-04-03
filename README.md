@@ -38,4 +38,33 @@ FeedFusionAI is an AI-powered RSS reader that aggregates your favorite news feed
 
 ## Architecture
 
-The project follows a monorepo structure with separate directories for each major component 
+The project follows a monorepo structure with separate directories for each major component:
+feedfusionai/
+├── backend/                # Spring Boot application (Java, MongoDB, Spring Security)
+├── frontend/               # React web application (TailwindCSS)
+├── mobile/                 # (Optional) React Native mobile application
+├── docker-compose.yml      # Docker Compose file to orchestrate all services
+├── README.md               # Project overview and documentation
+├── LICENSE                 # Apache License 2.0
+└── .gitignore              # Git ignore rules
+
+---
+
+## Tech Stack
+
+- **Backend:** Java, Spring Boot, MongoDB, Spring Security, JWT, Docker
+- **Frontend:** React, TailwindCSS, Docker
+- **Mobile (Optional):** React Native
+- **AI Integration:** Local or external AI models (e.g., via Ollama or third-party summarization APIs)
+- **External Integrations:** APIs for popular task management services (Todoist, Microsoft To Do, Google Tasks)
+
+---
+
+## Installation
+
+### Prerequisites
+
+- Java 11+
+- Node.js and npm
+- Docker and Docker Compose
+- A running MongoDB instance (or use Docker to run one)
