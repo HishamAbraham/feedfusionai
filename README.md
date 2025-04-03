@@ -38,4 +38,4 @@ FeedFusionAI is an AI-powered RSS reader that aggregates your favorite news feed
 
 ## Architecture
 
-The project follows a monorepo structure with separate directories for each major component
+The project follows a monorepo structure with separate directories for each major component 
