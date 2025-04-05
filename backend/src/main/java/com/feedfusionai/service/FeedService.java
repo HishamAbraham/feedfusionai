@@ -1,33 +1,43 @@
 package com.feedfusionai.service;
 
 import com.feedfusionai.model.Feed;
+import com.feedfusionai.repository.FeedRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class FeedService {
 
-    private final List<Feed> feeds = new ArrayList<>();
+    @Autowired
+    private FeedRepository feedRepository;
 
     public List<Feed> getAllFeeds() {
-        return new ArrayList<>(feeds);
-    }
-
-    public Feed addFeed(Feed feed) {
-        if (feed.getId() == null) {
-            feed.setId(UUID.randomUUID().toString());
-        }
-        feeds.add(feed);
-        return feed;
+        return feedRepository.findAll();
     }
 
     public Optional<Feed> getFeedById(String id) {
-        return feeds.stream().filter(feed -> feed.getId().equals(id)).findFirst();
+        return feedRepository.findById(id);
     }
 
-    // Add more methods as needed
+    public Feed addFeed(Feed feed) {
+        return feedRepository.save(feed);
+    }
+
+    public Feed updateFeed(String id, Feed feed) {
+        return feedRepository.findById(id)
+                .map(existingFeed -> {
+                    existingFeed.setTitle(feed.getTitle());
+                    existingFeed.setUrl(feed.getUrl());
+                    existingFeed.setLastFetched(feed.getLastFetched());
+                    return feedRepository.save(existingFeed);
+                })
+                .orElseThrow(() -> new RuntimeException("Feed not found with id " + id));
+    }
+
+    public void deleteFeed(String id) {
+        feedRepository.deleteById(id);
+    }
 }
