@@ -3,6 +3,7 @@ package com.feedfusionai.model;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.Instant;
 
 @Data
@@ -10,12 +11,14 @@ import java.time.Instant;
 public class FeedItem {
     @Id
     private String id;
-    private String feedId; // Reference to the parent feed's ID
+
+    // Reference to the parent feed's ID
+    private String feedId;
+
     private String title;
-    private String summary;
-    private String content;
     private String link;
     private Instant publishedDate;
 
-    // Additional fields like author, categories, etc.
+    // New fields for additional content
+    private String description;
 }

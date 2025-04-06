@@ -1,12 +1,14 @@
 package com.feedfusionai.controller;
 
 import com.feedfusionai.model.Feed;
+import com.feedfusionai.service.FeedScannerService;
 import com.feedfusionai.service.FeedService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/feeds")
@@ -14,6 +16,9 @@ public class FeedController {
 
     @Autowired
     private FeedService feedService;
+
+    @Autowired
+    private FeedScannerService feedScannerService;
 
     // GET /api/feeds - Retrieve all feeds
     @GetMapping
@@ -35,15 +40,12 @@ public class FeedController {
         return feedService.addFeed(feed);
     }
 
-    // PUT /api/feeds/{id} - Update an existing feed
-    @PutMapping("/{id}")
-    public ResponseEntity<Feed> updateFeed(@PathVariable String id, @RequestBody Feed feed) {
-        try {
-            Feed updatedFeed = feedService.updateFeed(id, feed);
-            return ResponseEntity.ok(updatedFeed);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    // PATCH /api/feeds/{id} - Partially update a feed
+    @PatchMapping("/{id}")
+    public ResponseEntity<Feed> patchFeed(@PathVariable String id, @RequestBody Map<String, Object> updates) {
+        return feedService.patchFeed(id, updates)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // DELETE /api/feeds/{id} - Delete a feed
@@ -51,5 +53,11 @@ public class FeedController {
     public ResponseEntity<Void> deleteFeed(@PathVariable String id) {
         feedService.deleteFeed(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/refresh")
+    public ResponseEntity<String> refreshFeeds() {
+        feedScannerService.scanFeeds();
+        return ResponseEntity.ok("Feeds refreshed successfully");
     }
 }
