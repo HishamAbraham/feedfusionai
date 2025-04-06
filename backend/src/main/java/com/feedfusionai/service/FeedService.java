@@ -1,33 +1,60 @@
 package com.feedfusionai.service;
 
 import com.feedfusionai.model.Feed;
+import com.feedfusionai.repository.FeedRepository;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class FeedService {
 
-    private final List<Feed> feeds = new ArrayList<>();
+    @Autowired
+    private FeedRepository feedRepository;
+
 
     public List<Feed> getAllFeeds() {
-        return new ArrayList<>(feeds);
-    }
-
-    public Feed addFeed(Feed feed) {
-        if (feed.getId() == null) {
-            feed.setId(UUID.randomUUID().toString());
-        }
-        feeds.add(feed);
-        return feed;
+        return feedRepository.findAll();
     }
 
     public Optional<Feed> getFeedById(String id) {
-        return feeds.stream().filter(feed -> feed.getId().equals(id)).findFirst();
+        return feedRepository.findById(id);
     }
 
-    // Add more methods as needed
+    public Feed addFeed(Feed feed) {
+        return feedRepository.save(feed);
+    }
+
+    // Method to update specific fields using PATCH
+    public Optional<Feed> patchFeed(String id, Map<String, Object> updates) {
+        Optional<Feed> optionalFeed = feedRepository.findById(id);
+        if (optionalFeed.isPresent()) {
+            Feed feed = optionalFeed.get();
+
+            if (updates.containsKey("title")) {
+                feed.setTitle((String) updates.get("title"));
+            }
+            if (updates.containsKey("url")) {
+                feed.setUrl((String) updates.get("url"));
+            }
+            if (updates.containsKey("lastFetched")) {
+                // Assuming ISO-8601 String representation; convert to Instant.
+                feed.setLastFetched(Instant.parse((String) updates.get("lastFetched")));
+            }
+
+            // Add additional fields as needed
+
+            return Optional.of(feedRepository.save(feed));
+        }
+        return Optional.empty();
+    }
+
+    public void deleteFeed(String id) {
+        feedRepository.deleteById(id);
+    }
+
 }
