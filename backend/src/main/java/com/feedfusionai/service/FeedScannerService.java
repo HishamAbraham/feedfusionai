@@ -2,8 +2,6 @@ package com.feedfusionai.service;
 
 import com.feedfusionai.model.Feed;
 import com.feedfusionai.model.FeedItem;
-import com.rometools.modules.mediarss.MediaModule;
-import com.rometools.modules.mediarss.types.MediaContent;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.SyndFeedInput;
@@ -18,7 +16,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class FeedScannerService {
@@ -26,22 +26,30 @@ public class FeedScannerService {
     @Autowired
     private RestTemplate restTemplate;
 
-    // Instead of directly autowiring FeedRepository, we now use FeedService
     @Autowired
     private FeedService feedService;
 
     @Autowired
     private FeedItemService feedItemService;
 
+    /**
+     * Asynchronously scans all feeds and returns the total number of new feed items added.
+     */
     @Async
-    public void scanFeeds() {
+    public CompletableFuture<Integer> scanFeeds() {
+        int totalNewItems = 0;
         List<Feed> feeds = feedService.getAllFeeds();
         for (Feed feed : feeds) {
-            scanFeed(feed);
+            totalNewItems += scanFeed(feed);
         }
+        return CompletableFuture.completedFuture(totalNewItems);
     }
 
-    public void scanFeed(Feed feed) {
+    /**
+     * Scans an individual feed and returns the number of new feed items added.
+     */
+    public int scanFeed(Feed feed) {
+        int newItemsCount = 0;
         try {
             String xmlContent = restTemplate.getForObject(feed.getUrl(), String.class);
             if (xmlContent != null) {
@@ -49,38 +57,58 @@ public class FeedScannerService {
                 System.out.println("Scanned feed: " + feed.getTitle() + " (" + feed.getUrl() + "), found " + parsedItems.size() + " items.");
 
                 for (FeedItem parsedItem : parsedItems) {
-                    // Associate the feed item with the parent feed
+                    // Set the parent feed ID and default read flag for new items.
                     parsedItem.setFeedId(feed.getId());
 
-                    // Check for an existing feed item by feedId and link via the FeedItemService
                     Optional<FeedItem> existingOpt = feedItemService.findByFeedLink(parsedItem.getFeedLink());
                     if (existingOpt.isPresent()) {
                         FeedItem existingItem = existingOpt.get();
-                        // Update fields if necessary
-                        existingItem.setTitle(parsedItem.getTitle());
-                        existingItem.setDescription(parsedItem.getDescription());
-                        existingItem.setPublishedDate(parsedItem.getPublishedDate());
-                        existingItem.setRead(false);
-                        feedItemService.updateFeedItem(existingItem.getFeedId(), existingItem);
+                        boolean updated = false;
+
+                        // Compare and update title
+                        if (!Objects.equals(existingItem.getTitle(), parsedItem.getTitle())) {
+                            existingItem.setTitle(parsedItem.getTitle());
+                            updated = true;
+                        }
+                        // Compare and update description
+                        if (!Objects.equals(existingItem.getDescription(), parsedItem.getDescription())) {
+                            existingItem.setDescription(parsedItem.getDescription());
+                            updated = true;
+                        }
+                        // Compare and update publication date
+                        if (!Objects.equals(existingItem.getPublishedDate(), parsedItem.getPublishedDate())) {
+                            existingItem.setPublishedDate(parsedItem.getPublishedDate());
+                            updated = true;
+                        }
+
+                        if (updated) {
+                            // Only if an update occurred, mark item as unread and save.
+                            existingItem.setRead(false);
+                            feedItemService.updateFeedItem(existingItem.getFeedId(),existingItem);
+                        }
                     } else {
+                        // New item—ensure it is marked unread.
+                        parsedItem.setRead(false);
                         feedItemService.addFeedItem(parsedItem);
+                        newItemsCount++;
                     }
                 }
-
-                // Update the feed's lastFetched timestamp and save via FeedService
+                // Update the feed's lastFetched timestamp.
                 feed.setLastFetched(Instant.now());
-                feedService.addFeed(feed);  // Assuming you have a method saveFeed() or updateFeed() in FeedService
+                feedService.addFeed(feed);
             }
         } catch (Exception e) {
             System.err.println("Error scanning feed: " + feed.getUrl() + " - " + e.getMessage());
         }
+        return newItemsCount;
     }
 
     /**
      * Parses the raw XML content of an RSS feed and returns a list of FeedItem objects.
+     * Extracts title, link, description, and published date.
      *
-     * @param xmlContent the raw XML content of the feed
-     * @return a list of parsed FeedItem objects
+     * @param xmlContent the raw XML content from the feed.
+     * @return a list of parsed FeedItem objects.
      */
     private List<FeedItem> parseFeedContent(String xmlContent) {
         List<FeedItem> items = new ArrayList<>();
@@ -95,7 +123,7 @@ public class FeedScannerService {
                 if (entry.getDescription() != null) {
                     feedItem.setDescription(entry.getDescription().getValue());
                 }
-                feedItem.setRead(false);
+                // Removed thumbnail extraction for now.
                 items.add(feedItem);
             }
         } catch (Exception e) {

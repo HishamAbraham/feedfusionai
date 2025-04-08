@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/feeds")
@@ -56,8 +57,10 @@ public class FeedController {
     }
 
     @PatchMapping("/refresh")
-    public ResponseEntity<String> refreshFeeds() {
-        feedScannerService.scanFeeds();
-        return ResponseEntity.ok("Feeds refreshed successfully");
+    public ResponseEntity<String> refreshFeeds() throws Exception {
+        // Trigger the feed scanning and wait for the result
+        CompletableFuture<Integer> newItemsFuture = feedScannerService.scanFeeds();
+        int totalNewItems = newItemsFuture.get(); // Block until completed; consider async handling for production
+        return ResponseEntity.ok("Feeds refreshed successfully, " + totalNewItems + " new items added.");
     }
 }
