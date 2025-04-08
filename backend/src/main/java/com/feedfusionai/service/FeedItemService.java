@@ -24,9 +24,17 @@ public class FeedItemService {
         return feedItemRepository.findById(id);
     }
 
+    public List<FeedItem> getUnreadFeedItem() {
+        return feedItemRepository.findByReadFalse();
+    }
+
     // Retrieve all feed items for a given feed
     public List<FeedItem> getFeedItemsByFeedId(String feedId) {
         return feedItemRepository.findByFeedId(feedId);
+    }
+
+    public List<FeedItem> getUnreadFeedItemsByFeedId(String feedId) {
+        return feedItemRepository.findByFeedIdAndReadFalse(feedId);
     }
 
     public Optional<FeedItem> findByFeedLink(String link) {
@@ -44,6 +52,15 @@ public class FeedItemService {
             existingItem.setTitle(updatedFeedItem.getTitle());
             existingItem.setFeedLink(updatedFeedItem.getFeedLink());
             existingItem.setPublishedDate(updatedFeedItem.getPublishedDate());
+            existingItem.setRead(updatedFeedItem.getRead());
+            // Add or update additional fields as necessary
+            return feedItemRepository.save(existingItem);
+        });
+    }
+
+    public Optional<FeedItem> toggleReadStatus(String id) {
+        return feedItemRepository.findById(id).map(existingItem -> {
+            existingItem.setRead(!existingItem.getRead());
             // Add or update additional fields as necessary
             return feedItemRepository.save(existingItem);
         });

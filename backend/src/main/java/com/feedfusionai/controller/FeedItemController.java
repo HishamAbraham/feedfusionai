@@ -22,6 +22,12 @@ public class FeedItemController {
         return feedItemService.getAllFeedItems();
     }
 
+    @GetMapping("unread")
+    public List<FeedItem> getUnreadFeedItems() {
+        return feedItemService.getUnreadFeedItem();
+    }
+
+
     // GET /api/feed-items/{id} - Retrieve a feed item by ID
     @GetMapping("/{id}")
     public ResponseEntity<FeedItem> getFeedItemById(@PathVariable String id) {
@@ -30,9 +36,23 @@ public class FeedItemController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+
+
     // GET /api/feed-items/for-feed/{feedId} - Retrieve feed items for a specific feed
     @GetMapping("/for-feed/{feedId}")
     public List<FeedItem> getFeedItemsForFeed(@PathVariable String feedId) {
         return feedItemService.getFeedItemsByFeedId(feedId);
+    }
+
+    @GetMapping("/for-feed/{feedId}/unread")
+    public List<FeedItem> getUnreadFeedItemsForFeed(@PathVariable String feedId) {
+        return feedItemService.getUnreadFeedItemsByFeedId(feedId);
+    }
+
+    @PatchMapping("/{id}/toggle")
+    public ResponseEntity<FeedItem> toggleReadStatus(@PathVariable String id) {
+        return feedItemService.toggleReadStatus(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

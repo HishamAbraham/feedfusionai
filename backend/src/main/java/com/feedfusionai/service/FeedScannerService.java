@@ -60,6 +60,7 @@ public class FeedScannerService {
                         existingItem.setTitle(parsedItem.getTitle());
                         existingItem.setDescription(parsedItem.getDescription());
                         existingItem.setPublishedDate(parsedItem.getPublishedDate());
+                        existingItem.setRead(false);
                         feedItemService.updateFeedItem(existingItem.getFeedId(), existingItem);
                     } else {
                         feedItemService.addFeedItem(parsedItem);
@@ -94,6 +95,7 @@ public class FeedScannerService {
                 if (entry.getDescription() != null) {
                     feedItem.setDescription(entry.getDescription().getValue());
                 }
+                feedItem.setRead(false);
                 items.add(feedItem);
             }
         } catch (Exception e) {
