@@ -53,7 +53,7 @@ public class FeedScannerService {
                     parsedItem.setFeedId(feed.getId());
 
                     // Check for an existing feed item by feedId and link via the FeedItemService
-                    Optional<FeedItem> existingOpt = feedItemService.findByFeedLink(parsedItem.getLink());
+                    Optional<FeedItem> existingOpt = feedItemService.findByFeedLink(parsedItem.getFeedLink());
                     if (existingOpt.isPresent()) {
                         FeedItem existingItem = existingOpt.get();
                         // Update fields if necessary
@@ -89,7 +89,7 @@ public class FeedScannerService {
             for (SyndEntry entry : syndFeed.getEntries()) {
                 FeedItem feedItem = new FeedItem();
                 feedItem.setTitle(entry.getTitle());
-                feedItem.setLink(entry.getLink());
+                feedItem.setFeedLink(entry.getLink());
                 feedItem.setPublishedDate(entry.getPublishedDate() != null ? entry.getPublishedDate().toInstant() : Instant.now());
                 if (entry.getDescription() != null) {
                     feedItem.setDescription(entry.getDescription().getValue());

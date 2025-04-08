@@ -42,7 +42,7 @@ public class FeedItemService {
     public Optional<FeedItem> updateFeedItem(String id, FeedItem updatedFeedItem) {
         return feedItemRepository.findById(id).map(existingItem -> {
             existingItem.setTitle(updatedFeedItem.getTitle());
-            existingItem.setLink(updatedFeedItem.getLink());
+            existingItem.setFeedLink(updatedFeedItem.getFeedLink());
             existingItem.setPublishedDate(updatedFeedItem.getPublishedDate());
             // Add or update additional fields as necessary
             return feedItemRepository.save(existingItem);

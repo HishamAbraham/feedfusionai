@@ -16,7 +16,7 @@ public class FeedItem {
     private String feedId;
 
     private String title;
-    private String link;
+    private String feedLink;
     private Instant publishedDate;
 
     // New fields for additional content
