@@ -1,0 +1,121 @@
+/* FeedDashboard.css */
+
+/* Container for the dashboard */
+.dashboard {
+  padding: 20px;
+  background-color: #f4f6f8;
+}
+
+/* Header styles */
+.dashboard-header {
+  background-color: #2f3542;
+  color: #fff;
+  padding: 15px 20px;
+  border-radius: 5px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+/* Action buttons under the title */
+.header-buttons {
+  margin-top: 10px; /* New line: buttons are below title */
+  display: flex;
+  gap: 10px;
+}
+
+.header-buttons .btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.btn-add {
+  background-color: #0984e3;
+  color: #fff;
+}
+
+.btn-refresh {
+  background-color: #6c5ce7;
+  color: #fff;
+}
+
+/* Feed list styles */
+.feeds {
+  margin-top: 20px;
+}
+
+.feed-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.feed-card {
+  background: #fff;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feed-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.feed-link {
+  text-decoration: none;
+  color: inherit;
+  flex-grow: 1;
+}
+
+.feed-content {
+  flex-grow: 1;
+}
+
+.feed-title {
+  margin: 0;
+  color: #2d3436;
+  font-size: 1.2em;
+}
+
+.feed-fetched {
+  margin: 5px 0 0;
+  font-size: 0.8em;
+  color: #b2bec3;
+}
+
+/* Action buttons */
+.feed-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feed-actions .btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.85em;
+}
+
+.btn-edit {
+  background-color: #00b894;
+  color: #fff;
+}
+
+.btn-delete {
+  background-color: #d63031;
+  color: #fff;
+}
