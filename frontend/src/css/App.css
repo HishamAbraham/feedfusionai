@@ -1,0 +1,25 @@
+.app-container {
+  display: flex;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+.left-panel {
+  width: 30%;
+  border-right: 1px solid #ccc;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+}
+
+.right-panel {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.placeholder {
+  text-align: center;
+  margin-top: 50px;
+  color: #777;
+}

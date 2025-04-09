@@ -1,0 +1,64 @@
+/* FeedItemList.css */
+
+.feed-item-list {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    margin: 20px auto;
+    max-width: 800px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .feed-item-list h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .feed-item-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .feed-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s;
+  }
+  
+  .feed-item:last-child {
+    border-bottom: none;
+  }
+  
+  .feed-item:hover {
+    background-color: #f9f9f9;
+  }
+  
+  .feed-item h3 {
+    margin: 0 0 10px;
+    color: #2c3e50;
+    font-size: 1.2em;
+  }
+  
+  .item-description {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  
+  .feed-item p {
+    margin: 5px 0;
+    font-size: 0.9em;
+    color: #777;
+  }
+  
+  .feed-item a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .feed-item a:hover {
+    text-decoration: underline;
+  }
