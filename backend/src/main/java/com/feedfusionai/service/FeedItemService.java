@@ -58,9 +58,9 @@ public class FeedItemService {
         });
     }
 
-    public Optional<FeedItem> toggleReadStatus(String id) {
+    public Optional<FeedItem> markFeedRead(String id) {
         return feedItemRepository.findById(id).map(existingItem -> {
-            existingItem.setRead(!existingItem.getRead());
+            existingItem.setRead(true);
             // Add or update additional fields as necessary
             return feedItemRepository.save(existingItem);
         });
