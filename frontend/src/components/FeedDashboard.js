@@ -1,87 +1,135 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import FeedForm from "./FeedForm"; // Ensure you have FeedForm component implemented
 import "../css/FeedDashboard.css";
 
-function FeedDashboard({ onSelectFeed }) {
+function FeedDashboard({ onSelectFeed, refreshTrigger }) {
   const [feeds, setFeeds] = useState([]);
+  const [showFeedForm, setShowFeedForm] = useState(false);
+  const [currentFeed, setCurrentFeed] = useState(null);
 
-  const loadFeeds = () => {
+  // Function to load feeds (GET /api/feeds)
+  const fetchFeeds = () => {
     fetch("http://localhost:8080/api/feeds")
       .then((res) => res.json())
       .then((data) => setFeeds(data))
       .catch((err) => console.error("Failed to fetch feeds", err));
   };
-  const refreshFeeds = () => {
-    fetch("http://localhost:8080/api/feeds/refresh", {
-      method: "PATCH",
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Refresh failed");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log("Refresh response:", data);
-        // Optionally, you can display the number of new items added by the refresh
-        // Now reload the feed list
-        loadFeeds();
-      })
-      .catch((err) => {
-        console.error("Failed to refresh feeds", err);
-      });
-  };
 
+  // Fetch feeds on mount and whenever refreshTrigger changes.
   useEffect(() => {
-    fetch("http://localhost:8080/api/feeds")
-      .then((res) => res.json())
-      .then((data) => setFeeds(data))
-      .catch((err) => console.error("Failed to fetch feeds", err));
-  }, []);
+    fetchFeeds();
+  }, [refreshTrigger]);
+
+  // When "Add Feed" is clicked, clear the currentFeed and open the form.
+  const handleAddFeed = () => {
+    setCurrentFeed(null);
+    setShowFeedForm(true);
+  };
+
+  // When "Edit" is clicked, set the currentFeed to populate the form.
+  const handleEditFeed = (feed, event) => {
+    event.stopPropagation();
+    setCurrentFeed(feed);
+    setShowFeedForm(true);
+  };
+
+  // When the form is submitted, perform an API call.
+  const handleFormSubmit = (feedData) => {
+    if (currentFeed) {
+      // In edit mode, update the feed via PATCH.
+      fetch(`http://localhost:8080/api/feeds/${currentFeed.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(feedData),
+      })
+        .then((res) => res.json())
+        .then(() => {
+          setShowFeedForm(false);
+          fetchFeeds();
+        })
+        .catch((err) => console.error("Failed to update feed", err));
+    } else {
+      // In add mode, create a new feed via POST.
+      fetch("http://localhost:8080/api/feeds", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(feedData),
+      })
+        .then((res) => res.json())
+        .then(() => {
+          setShowFeedForm(false);
+          fetchFeeds();
+        })
+        .catch((err) => console.error("Failed to add feed", err));
+    }
+  };
+
+  const handleCancelForm = () => {
+    setShowFeedForm(false);
+  };
+
+  // Delete a feed.
+  const handleDeleteFeed = (feedId, event) => {
+    event.stopPropagation();
+    fetch(`http://localhost:8080/api/feeds/${feedId}`, { method: "DELETE" })
+      .then(() => fetchFeeds())
+      .catch((err) => console.error("Failed to delete feed", err));
+  };
 
   return (
-    <div className="dashboard">
-      <header className="dashboard-header">
-        <h1>Feed Fusion AI</h1>
-        <div className="header-buttons">
-          <button className="btn btn-add">Add Feed</button>
-          <button className="btn btn-refresh" onClick={refreshFeeds}>
-            Refresh Feeds
-          </button>
+    <div className="feeds">
+      <h2>Your Subscriptions</h2>
+      {showFeedForm && (
+        <div className="feed-form-modal">
+          <FeedForm
+            feed={currentFeed}
+            onSubmit={handleFormSubmit}
+            onCancel={handleCancelForm}
+          />
         </div>
-      </header>
-
-      <section className="feeds">
-        <h2>Your Feeds</h2>
-        {feeds.length === 0 ? (
-          <p>No feeds found.</p>
-        ) : (
-          <ul className="feed-list">
-            {feeds.map((feed) => (
-              <li
-                key={feed.id}
-                className="feed-card"
-                onClick={() => onSelectFeed && onSelectFeed(feed.id)}
-                style={{ cursor: "pointer" }}
-              >
-                <div className="feed-content">
-                  <h3 className="feed-title">{feed.title}</h3>
-                  <p className="feed-fetched">
-                    Last Fetched:{" "}
-                    {feed.lastFetched
-                      ? new Date(feed.lastFetched).toLocaleString()
-                      : "N/A"}
-                  </p>
-                </div>
-                <div className="feed-actions">
-                  <button className="btn btn-edit">Edit</button>
-                  <button className="btn btn-delete">Delete</button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      )}
+      {feeds.length === 0 ? (
+        <p>No feeds found.</p>
+      ) : (
+        <div className="feed-card-container">
+          {feeds.map((feed) => (
+            <div
+              key={feed.id}
+              className="feed-card"
+              onClick={() => onSelectFeed && onSelectFeed(feed.id)}
+            >
+              <div className="feed-card-content">
+                <h3 className="feed-title">{feed.title}</h3>
+                <p className="feed-fetched">
+                  Last Fetched:{" "}
+                  {feed.lastFetched
+                    ? new Date(feed.lastFetched).toLocaleString()
+                    : "N/A"}
+                </p>
+              </div>
+              <div className="feed-card-actions">
+                <button
+                  className="btn btn-edit"
+                  onClick={(e) => handleEditFeed(feed, e)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-delete"
+                  onClick={(e) => handleDeleteFeed(feed.id, e)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

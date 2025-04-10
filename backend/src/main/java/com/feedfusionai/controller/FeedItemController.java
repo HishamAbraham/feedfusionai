@@ -49,9 +49,9 @@ public class FeedItemController {
         return feedItemService.getUnreadFeedItemsByFeedId(feedId);
     }
 
-    @PatchMapping("/{id}/toggle")
-    public ResponseEntity<FeedItem> toggleReadStatus(@PathVariable String id) {
-        return feedItemService.toggleReadStatus(id)
+    @PatchMapping("/{id}/mark-read")
+    public ResponseEntity<FeedItem> markFeedRead(@PathVariable String id) {
+        return feedItemService.markFeedRead(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
