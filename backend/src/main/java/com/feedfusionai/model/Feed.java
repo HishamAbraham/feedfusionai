@@ -2,6 +2,7 @@ package com.feedfusionai.model;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 
@@ -13,6 +14,10 @@ public class Feed {
     private String title;
     private String url;
     private Instant lastFetched;
+    @Transient
+    private long unreadCount;
+
+
 
     // Additional fields, constructors, or methods can be added here
 }

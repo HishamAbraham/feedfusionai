@@ -90,7 +90,7 @@ function App() {
           </div>
           <div className="right-panel">
             {selectedFeedId ? (
-              <FeedItemList feedId={selectedFeedId} />
+              <FeedItemList feedId={selectedFeedId} setRefreshTrigger={setRefreshTrigger}/>
             ) : (
               <div className="placeholder">
                 <h2>Select a feed to see its items</h2>

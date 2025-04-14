@@ -1,6 +1,8 @@
 package com.feedfusionai.service;
 
 import com.feedfusionai.model.Feed;
+import com.feedfusionai.model.FeedItem;
+import com.feedfusionai.repository.FeedItemRepository;
 import com.feedfusionai.repository.FeedRepository;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
@@ -16,13 +18,22 @@ public class FeedService {
     @Autowired
     private FeedRepository feedRepository;
 
+    @Autowired
+    private FeedItemRepository feedItemRepository;
+
 
     public List<Feed> getAllFeeds() {
-        return feedRepository.findAll();
+        List<Feed> feeds = feedRepository.findAll();
+        for (Feed feed : feeds) {
+            feed.setUnreadCount(feedItemRepository.countByFeedIdAndReadFalse(feed.getId()));
+        }
+        return feeds;
     }
 
     public Optional<Feed> getFeedById(String id) {
-        return feedRepository.findById(id);
+        Optional<Feed> feed = feedRepository.findById(id);
+        feed.ifPresent(value -> value.setUnreadCount(feedItemRepository.countByFeedIdAndReadFalse(value.getId())));
+        return feed;
     }
 
     public Feed addFeed(Feed feed) {

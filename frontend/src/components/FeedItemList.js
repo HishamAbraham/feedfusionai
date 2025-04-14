@@ -1,6 +1,9 @@
 // src/components/FeedItemList.js
 import React, { useState, useEffect } from "react";
 import "../css/FeedItemList.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBookOpen, faCheck, faStar as solidStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar as regularStar } from "@fortawesome/free-regular-svg-icons";
 import { sanitizeAndTransform } from "../utils/sanitizeHtml";
 
 function FeedItemList({ feedId }) {
@@ -9,11 +12,19 @@ function FeedItemList({ feedId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [viewReadOnly, setViewReadOnly] = useState(false);
+  const [viewStarredOnly, setViewStarredOnly] = useState(false);
 
+  // Determine the API URL based on the starred toggle.
+  const feedItemsUrl =
+    viewStarredOnly
+      ? `http://localhost:8080/api/feed-items/for-feed/${feedId}/starred`
+      : `http://localhost:8080/api/feed-items/for-feed/${feedId}`;
+
+  // Fetch feed items when feedId or feedItemsUrl changes.
   useEffect(() => {
     if (!feedId) return;
     setLoading(true);
-    fetch(`http://localhost:8080/api/feed-items/for-feed/${feedId}`)
+    fetch(feedItemsUrl)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Network response was not ok for feed items");
@@ -29,11 +40,15 @@ function FeedItemList({ feedId }) {
         setError(err.message);
         setLoading(false);
       });
-  }, [feedId]);
+  }, [feedId, feedItemsUrl]);
 
-  // Fetch feed details to get the feed title
+  // Fetch feed details to get the feed title.
   useEffect(() => {
     if (!feedId) return;
+    if (feedId === "starred") {
+      setFeedTitle("Starred Feeds");
+      return;
+    }
     fetch(`http://localhost:8080/api/feeds/${feedId}`)
       .then((res) => {
         if (!res.ok) {
@@ -47,6 +62,7 @@ function FeedItemList({ feedId }) {
       });
   }, [feedId]);
 
+  // Function to mark a single feed item as read.
   const markItemAsRead = (itemId) => {
     const updatedItems = feedItems.map((item) =>
       item.id === itemId ? { ...item, read: true } : item
@@ -56,9 +72,12 @@ function FeedItemList({ feedId }) {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ read: true }),
-    }).catch((err) => console.error("Failed to update feed item as read", err));
+    }).catch((err) =>
+      console.error("Failed to update feed item as read", err)
+    );
   };
 
+  // Function to mark all feed items as read.
   const markAllAsRead = () => {
     const updatedItems = feedItems.map((item) => ({ ...item, read: true }));
     setFeedItems(updatedItems);
@@ -73,14 +92,36 @@ function FeedItemList({ feedId }) {
     });
   };
 
+  // Toggle the view filter between read and unread items.
   const toggleView = () => {
     setViewReadOnly((prev) => !prev);
   };
 
-  const displayedItems = feedItems.filter((item) =>
-    viewReadOnly ? item.read : !item.read
-  );
+  // Toggle starred view.
+  const toggleStarredView = () => {
+    setViewStarredOnly((prev) => !prev);
+  };
 
+  // When in starred view, show all starred items; otherwise, filter based on read status.
+  const displayedItems = viewStarredOnly
+    ? feedItems
+    : feedItems.filter((item) => (viewReadOnly ? item.read : !item.read));
+
+  // Function to toggle the star status of an item.
+  const toggleStar = (itemId) => {
+    fetch(`http://localhost:8080/api/feed-items/${itemId}/toggle-star`, {
+      method: "PATCH"
+    })
+      .then(() => {
+        const updatedItems = feedItems.map((i) =>
+          i.id === itemId ? { ...i, starred: !i.starred } : i
+        );
+        setFeedItems(updatedItems);
+      })
+      .catch((err) => console.error("Failed to toggle star", err));
+  };
+
+  // Helper function to render the description with sanitization.
   const renderDescription = (description) => {
     if (typeof description === "string") {
       return sanitizeAndTransform(description);
@@ -107,6 +148,9 @@ function FeedItemList({ feedId }) {
           <button className="btn btn-toggle-view" onClick={toggleView}>
             {viewReadOnly ? "View Unread" : "View Read"}
           </button>
+          <button className="btn btn-toggle-starred" onClick={toggleStarredView}>
+            {viewStarredOnly ? "View All Items" : "View Starred Only"}
+          </button>
         </div>
       </header>
       {displayedItems.length === 0 ? (
@@ -120,25 +164,39 @@ function FeedItemList({ feedId }) {
                 {renderDescription(item.description)}
               </div>
               <p>
-                <small>{new Date(item.publishedDate).toLocaleString()}</small>
+                <small>
+                  {new Date(item.publishedDate).toLocaleString()}
+                </small>
               </p>
-              <div className="feed-item-card-actions">
+              {/* Toolbar with icon buttons for item actions */}
+              <div className="feed-item-toolbar">
                 <button
-                  className="btn btn-read-more"
+                  className="toolbar-button btn-read-more"
+                  title="Read More"
                   onClick={() =>
                     window.open(item.feedLink, "_blank", "noopener,noreferrer")
                   }
                 >
-                  Open Link
+                  <FontAwesomeIcon icon={faBookOpen} />
                 </button>
                 {!item.read && (
                   <button
-                    className="btn btn-mark-read-individual"
+                    className="toolbar-button btn-mark-read"
+                    title="Mark as Read"
                     onClick={() => markItemAsRead(item.id)}
                   >
-                    Mark as Read
+                    <FontAwesomeIcon icon={faCheck} />
                   </button>
                 )}
+                <button
+                  className="toolbar-button btn-toggle-star"
+                  title={item.starred ? "Unstar" : "Star"}
+                  onClick={() => toggleStar(item.id)}
+                >
+                  <FontAwesomeIcon
+                    icon={item.starred ? solidStar : regularStar}
+                  />
+                </button>
               </div>
             </div>
           ))}
