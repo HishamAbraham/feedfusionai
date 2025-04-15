@@ -1,12 +1,9 @@
 // src/components/FeedItemList.js
 import React, { useState, useEffect } from "react";
 import "../css/FeedItemList.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBookOpen, faCheck, faStar as solidStar } from "@fortawesome/free-solid-svg-icons";
-import { faStar as regularStar } from "@fortawesome/free-regular-svg-icons";
-import { sanitizeAndTransform } from "../utils/sanitizeHtml";
+import FeedItemCard from "./FeedItemCard";
 
-function FeedItemList({ feedId }) {
+function FeedItemList({ feedId, onItemMarkedRead }) {
   const [feedItems, setFeedItems] = useState([]);
   const [feedTitle, setFeedTitle] = useState("");
   const [loading, setLoading] = useState(true);
@@ -14,7 +11,7 @@ function FeedItemList({ feedId }) {
   const [viewReadOnly, setViewReadOnly] = useState(false);
   const [viewStarredOnly, setViewStarredOnly] = useState(false);
 
-  // Determine the API URL based on the starred toggle.
+  // Determine the API URL based on starred toggle.
   const feedItemsUrl =
     viewStarredOnly
       ? `http://localhost:8080/api/feed-items/for-feed/${feedId}/starred`
@@ -42,7 +39,7 @@ function FeedItemList({ feedId }) {
       });
   }, [feedId, feedItemsUrl]);
 
-  // Fetch feed details to get the feed title.
+  // Fetch feed details for title (or use default if feedId is "starred")
   useEffect(() => {
     if (!feedId) return;
     if (feedId === "starred") {
@@ -57,12 +54,10 @@ function FeedItemList({ feedId }) {
         return res.json();
       })
       .then((data) => setFeedTitle(data.title))
-      .catch((err) => {
-        console.error("Failed to fetch feed details", err);
-      });
+      .catch((err) => console.error("Failed to fetch feed details", err));
   }, [feedId]);
 
-  // Function to mark a single feed item as read.
+  // Mark a single item as read and trigger parent's unread count refresh.
   const markItemAsRead = (itemId) => {
     const updatedItems = feedItems.map((item) =>
       item.id === itemId ? { ...item, read: true } : item
@@ -72,12 +67,18 @@ function FeedItemList({ feedId }) {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ read: true }),
-    }).catch((err) =>
-      console.error("Failed to update feed item as read", err)
-    );
+    })
+      .then(() => {
+        if (typeof onItemMarkedRead === "function") {
+          onItemMarkedRead();
+        }
+      })
+      .catch((err) =>
+        console.error("Failed to update feed item as read", err)
+      );
   };
 
-  // Function to mark all feed items as read.
+  // Mark all items as read.
   const markAllAsRead = () => {
     const updatedItems = feedItems.map((item) => ({ ...item, read: true }));
     setFeedItems(updatedItems);
@@ -90,9 +91,12 @@ function FeedItemList({ feedId }) {
         console.error("Failed to mark feed item as read:", err)
       );
     });
+    if (typeof onItemMarkedRead === "function") {
+      onItemMarkedRead();
+    }
   };
 
-  // Toggle the view filter between read and unread items.
+  // Toggle read/unread view.
   const toggleView = () => {
     setViewReadOnly((prev) => !prev);
   };
@@ -102,15 +106,15 @@ function FeedItemList({ feedId }) {
     setViewStarredOnly((prev) => !prev);
   };
 
-  // When in starred view, show all starred items; otherwise, filter based on read status.
+  // Filtering: if viewing starred only, show all starred items; otherwise, apply read/unread filter.
   const displayedItems = viewStarredOnly
     ? feedItems
     : feedItems.filter((item) => (viewReadOnly ? item.read : !item.read));
 
-  // Function to toggle the star status of an item.
+  // Toggle star status.
   const toggleStar = (itemId) => {
     fetch(`http://localhost:8080/api/feed-items/${itemId}/toggle-star`, {
-      method: "PATCH"
+      method: "PATCH",
     })
       .then(() => {
         const updatedItems = feedItems.map((i) =>
@@ -121,17 +125,9 @@ function FeedItemList({ feedId }) {
       .catch((err) => console.error("Failed to toggle star", err));
   };
 
-  // Helper function to render the description with sanitization.
-  const renderDescription = (description) => {
-    if (typeof description === "string") {
-      return sanitizeAndTransform(description);
-    } else if (description && typeof description === "object") {
-      if (description.value) {
-        return sanitizeAndTransform(description.value);
-      }
-      return sanitizeAndTransform(JSON.stringify(description));
-    }
-    return "";
+  // Open the "Read More" link.
+  const openReadMore = (item) => {
+    window.open(item.feedLink, "_blank", "noopener,noreferrer");
   };
 
   if (loading) return <div>Loading feed items...</div>;
@@ -158,47 +154,13 @@ function FeedItemList({ feedId }) {
       ) : (
         <div className="feed-card-container">
           {displayedItems.map((item) => (
-            <div key={item.id} className="feed-item-card">
-              <h3>{item.title || "No Title Available"}</h3>
-              <div className="item-description">
-                {renderDescription(item.description)}
-              </div>
-              <p>
-                <small>
-                  {new Date(item.publishedDate).toLocaleString()}
-                </small>
-              </p>
-              {/* Toolbar with icon buttons for item actions */}
-              <div className="feed-item-toolbar">
-                <button
-                  className="toolbar-button btn-read-more"
-                  title="Read More"
-                  onClick={() =>
-                    window.open(item.feedLink, "_blank", "noopener,noreferrer")
-                  }
-                >
-                  <FontAwesomeIcon icon={faBookOpen} />
-                </button>
-                {!item.read && (
-                  <button
-                    className="toolbar-button btn-mark-read"
-                    title="Mark as Read"
-                    onClick={() => markItemAsRead(item.id)}
-                  >
-                    <FontAwesomeIcon icon={faCheck} />
-                  </button>
-                )}
-                <button
-                  className="toolbar-button btn-toggle-star"
-                  title={item.starred ? "Unstar" : "Star"}
-                  onClick={() => toggleStar(item.id)}
-                >
-                  <FontAwesomeIcon
-                    icon={item.starred ? solidStar : regularStar}
-                  />
-                </button>
-              </div>
-            </div>
+            <FeedItemCard
+              key={item.id}
+              item={item}
+              onMarkAsRead={markItemAsRead}
+              onToggleStar={toggleStar}
+              onReadMore={openReadMore}
+            />
           ))}
         </div>
       )}

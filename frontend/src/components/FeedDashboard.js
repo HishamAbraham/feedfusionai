@@ -1,8 +1,6 @@
 // src/components/FeedDashboard.js
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import FeedForm from "./FeedForm"; // Ensure FeedForm exists
 import "../css/FeedDashboard.css";
 
@@ -11,7 +9,7 @@ function FeedDashboard({ onSelectFeed, refreshTrigger }) {
   const [showFeedForm, setShowFeedForm] = useState(false);
   const [currentFeed, setCurrentFeed] = useState(null);
 
-  // Fetch feeds from the backend.
+  // Function to fetch feeds from the backend.
   const fetchFeeds = () => {
     fetch("http://localhost:8080/api/feeds")
       .then((res) => res.json())
@@ -19,22 +17,22 @@ function FeedDashboard({ onSelectFeed, refreshTrigger }) {
       .catch((err) => console.error("Failed to fetch feeds", err));
   };
 
-  // Re-fetch feeds on mount and when refreshTrigger changes.
+  // Re-fetch feeds on mount and whenever refreshTrigger changes.
   useEffect(() => {
     fetchFeeds();
   }, [refreshTrigger]);
 
-  // Handle editing a feed (open form with existing data).
+  // Handle editing a feed (open form with existing feed data).
   const handleEditFeed = (feed, e) => {
     e.stopPropagation();
     setCurrentFeed(feed);
     setShowFeedForm(true);
   };
 
-  // Handle form submission for adding or editing.
+  // Handle form submission for adding or editing a feed.
   const handleFormSubmit = (feedData) => {
     if (currentFeed) {
-      // Editing mode: update the feed using PATCH.
+      // Edit mode: update the feed using PATCH.
       fetch(`http://localhost:8080/api/feeds/${currentFeed.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -47,7 +45,7 @@ function FeedDashboard({ onSelectFeed, refreshTrigger }) {
         })
         .catch((err) => console.error("Failed to update feed", err));
     } else {
-      // Adding mode: create a new feed using POST.
+      // Add mode: create a new feed using POST.
       fetch("http://localhost:8080/api/feeds", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -62,7 +60,6 @@ function FeedDashboard({ onSelectFeed, refreshTrigger }) {
     }
   };
 
-  // Cancel showing the feed form.
   const handleCancelForm = () => setShowFeedForm(false);
 
   // Delete a feed.
@@ -74,65 +71,67 @@ function FeedDashboard({ onSelectFeed, refreshTrigger }) {
   };
 
   return (
-    <div className="feeds">
-      <h2>Your Feeds</h2>
-      {showFeedForm && (
-        <div className="feed-form-modal">
-          <FeedForm
-            feed={currentFeed}
-            onSubmit={handleFormSubmit}
-            onCancel={handleCancelForm}
-          />
-        </div>
-      )}
-      {feeds.length === 0 ? (
-        <p>No feeds found.</p>
-      ) : (
-        <div className="feed-card-container">
-          {feeds.map((feed) => (
-            <div
-              key={feed.id}
-              className="feed-card"
-              onClick={() => onSelectFeed && onSelectFeed(feed.id)}
-            >
-              <Link to={`/feed/${feed.id}`} className="feed-link">
-                <div className="feed-card-content">
-                  <h3 className="feed-title">
-                    {feed.title}{" "}
-                    {feed.unreadCount !== undefined && (
-                      <span className="unread-count">
-                        ({feed.unreadCount} unread)
-                      </span>
-                    )}
-                  </h3>
-                  <p className="feed-fetched">
-                    Last Fetched:{" "}
-                    {feed.lastFetched
-                      ? new Date(feed.lastFetched).toLocaleString()
-                      : "N/A"}
-                  </p>
+    <div className="dashboard">
+      <div className="feeds">
+        <h2>Your Feeds</h2>
+        {showFeedForm && (
+          <div className="feed-form-modal">
+            <FeedForm
+              feed={currentFeed}
+              onSubmit={handleFormSubmit}
+              onCancel={handleCancelForm}
+            />
+          </div>
+        )}
+        {feeds.length === 0 ? (
+          <p>No feeds found.</p>
+        ) : (
+          <div className="feed-card-container">
+            {feeds.map((feed) => (
+              <div
+                key={feed.id}
+                className="feed-card"
+                onClick={() => onSelectFeed && onSelectFeed(feed.id)}
+              >
+                <Link to={`/feed/${feed.id}`} className="feed-link">
+                  <div className="feed-card-content">
+                    <h3 className="feed-title">
+                      {feed.title}
+                      {feed.unreadCount !== undefined && (
+                        <span className="unread-count">
+                          ({feed.unreadCount} unread)
+                        </span>
+                      )}
+                    </h3>
+                    <p className="feed-fetched">
+                      Last Fetched:{" "}
+                      {feed.lastFetched
+                        ? new Date(feed.lastFetched).toLocaleString()
+                        : "N/A"}
+                    </p>
+                  </div>
+                </Link>
+                <div className="feed-card-actions">
+                  <button
+                    className="icon-button edit-btn"
+                    onClick={(e) => handleEditFeed(feed, e)}
+                    title="Edit Feed"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="icon-button delete-btn"
+                    onClick={(e) => handleDeleteFeed(feed.id, e)}
+                    title="Delete Feed"
+                  >
+                    Delete
+                  </button>
                 </div>
-              </Link>
-              <div className="feed-card-actions">
-                <button
-                  className="icon-button edit-btn"
-                  onClick={(e) => handleEditFeed(feed, e)}
-                  title="Edit Feed"
-                >
-                  <FontAwesomeIcon icon={faEdit} />
-                </button>
-                <button
-                  className="icon-button delete-btn"
-                  onClick={(e) => handleDeleteFeed(feed.id, e)}
-                  title="Delete Feed"
-                >
-                  <FontAwesomeIcon icon={faTrash} />
-                </button>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

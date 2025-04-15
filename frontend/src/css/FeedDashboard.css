@@ -1,56 +1,71 @@
 /* FeedDashboard.css */
 
-/* Define a consistent color palette using CSS variables */
+/* Light mode variables */
 :root {
-  --primary-color: #0984e3;      /* Used for primary action buttons */
-  --secondary-color: #00b894;    /* Used for edit actions */
-  --danger-color: #d63031;       /* Used for destructive actions (delete, unread count) */
-  --neutral-color: #333;         /* Default text and icon color */
-  --text-color: #2d3436;         /* Feed title text color */
-  --subtext-color: #b2bec3;      /* Secondary text (e.g., feed fetched date) */
-  --background-light: #f4f6f8;    /* General background color for containers */
-  --card-background: #fff;       /* Background for cards */
+  --dashboard-bg: #f4f6f8;
+  --feedcard-bg: #ffffff;
+  --feedcard-shadow: rgba(0, 0, 0, 0.1);
+  --feedcard-shadow-hover: rgba(0, 0, 0, 0.15);
+  --primary-text-color: #333333;
+  --secondary-text-color: #777777;
+  --accent-color: #0984e3;
+  --accent-hover: #087dc2;
+  --danger-color: #d63031;
+  --success-color: #00b894;
 }
 
-/* Container for feeds */
-.feeds {
+/* Dark mode overrides */
+.dark-mode {
+  --dashboard-bg: #202124;
+  --feedcard-bg: #2f2f2f;
+  --feedcard-shadow: rgba(0, 0, 0, 0.5);
+  --feedcard-shadow-hover: rgba(0, 0, 0, 0.7);
+  --primary-text-color: #e8eaed;
+  --secondary-text-color: #bdc1c6;
+  --accent-color: #8ab4f8;
+  --accent-hover: #5f9cf0;
+  --danger-color: #ff5c5c;
+  --success-color: #6edfa7;
+}
+
+.dashboard {
+  background-color: var(--dashboard-bg);
   padding: 10px;
-  background-color: var(--background-light);
 }
 
-/* Heading for feeds */
+.feeds {
+  padding: 5px 0;
+}
+
 .feeds h2 {
   margin: 0 0 10px 0;
   font-size: 1.5em;
-  color: var(--neutral-color);
+  color: var(--primary-text-color);
 }
 
-/* Card container for feed cards */
 .feed-card-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* Individual feed card styling */
 .feed-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--card-background);
+  background: var(--feedcard-bg);
   border-radius: 8px;
   padding: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 4px var(--feedcard-shadow);
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .feed-card:hover {
   transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 6px var(--feedcard-shadow-hover);
 }
 
-/* Feed card content */
 .feed-card-content {
   flex-grow: 1;
 }
@@ -58,36 +73,32 @@
 .feed-title {
   margin: 0;
   font-size: 1.2rem;
-  color: var(--text-color);
+  color: var(--primary-text-color);
 }
 
-/* Unread count styling */
 .unread-count {
   font-size: 0.9rem;
   color: var(--danger-color);
   margin-left: 8px;
 }
 
-/* Feed fetched date styling */
 .feed-fetched {
   margin-top: 5px;
   font-size: 0.8rem;
-  color: var(--subtext-color);
+  color: var(--secondary-text-color);
 }
 
-/* Actions in the feed card */
 .feed-card-actions {
   display: flex;
   gap: 6px;
 }
 
-/* Icon button common style */
 .icon-button {
   border: none;
   background: transparent;
   cursor: pointer;
   font-size: 1rem;
-  color: var(--neutral-color);
+  color: var(--primary-text-color);
   padding: 6px;
   border-radius: 4px;
   transition: background-color 0.2s ease;
@@ -97,22 +108,21 @@
   background-color: #eaeaea;
 }
 
-/* Specific button colors */
 .edit-btn {
-  color: var(--secondary-color);
+  color: var(--success-color);
 }
 
 .delete-btn {
   color: var(--danger-color);
 }
 
-/* Modal styling for FeedForm if needed */
+/* Modal for FeedForm */
 .feed-form-modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: var(--card-background);
+  background: var(--feedcard-bg);
   padding: 30px;
   z-index: 1000;
   border-radius: 8px;

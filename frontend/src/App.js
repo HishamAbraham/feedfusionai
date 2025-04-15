@@ -1,25 +1,24 @@
+// src/App.js
 import React, { useState } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import Header from "./components/Header";
 import FeedDashboard from "./components/FeedDashboard";
 import FeedItemList from "./components/FeedItemList";
 import FeedForm from "./components/FeedForm";
-import "./css/App.css"; // Ensure this path matches your project structure
+import "./css/App.css"; // Global CSS
 
 function App() {
   const [selectedFeedId, setSelectedFeedId] = useState(null);
   const [showFeedForm, setShowFeedForm] = useState(false);
-  const [editingFeed, setEditingFeed] = useState(null); // For future editing
-  // This counter will be used to refresh the FeedDashboard component
+  const [editingFeed, setEditingFeed] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // Function to handle adding a new feed; in add mode, editingFeed is null.
   const handleAddFeed = () => {
     setEditingFeed(null);
     setShowFeedForm(true);
   };
 
-  // Function to handle refreshing feeds.
   const handleRefreshFeeds = () => {
     fetch("http://localhost:8080/api/feeds/refresh", { method: "PATCH" })
       .then((res) => {
@@ -28,17 +27,18 @@ function App() {
       })
       .then((data) => {
         console.log("Refresh response:", data);
-        // Increase the refresh counter to notify FeedDashboard to re-fetch feeds
         setRefreshTrigger((prev) => prev + 1);
       })
       .catch((err) => console.error("Failed to refresh feeds", err));
   };
 
-  // When the feed form is submitted, call this function.
-  // In a real app, you might want to re-fetch the feeds afterward.
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => !prev);
+  };
+
   const handleFormSubmit = (feedData) => {
     if (editingFeed) {
-      // Edit existing feed (PATCH)
       fetch(`http://localhost:8080/api/feeds/${editingFeed.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -47,12 +47,10 @@ function App() {
         .then((res) => res.json())
         .then(() => {
           setShowFeedForm(false);
-          // Trigger dashboard refresh
           setRefreshTrigger((prev) => prev + 1);
         })
         .catch((err) => console.error("Failed to update feed", err));
     } else {
-      // Add new feed (POST)
       fetch("http://localhost:8080/api/feeds", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -61,20 +59,22 @@ function App() {
         .then((res) => res.json())
         .then(() => {
           setShowFeedForm(false);
-          // Trigger dashboard refresh
           setRefreshTrigger((prev) => prev + 1);
         })
         .catch((err) => console.error("Failed to add feed", err));
     }
   };
 
-  // Handler for cancelling the form.
   const handleCancelForm = () => setShowFeedForm(false);
 
   return (
     <Router>
-      <div className="app-container">
-        <Header onAddFeed={handleAddFeed} onRefreshFeeds={handleRefreshFeeds} />
+      <div className={`app-container ${darkMode ? "dark-mode" : ""}`}>
+        <Header
+          onAddFeed={handleAddFeed}
+          onRefreshFeeds={handleRefreshFeeds}
+          onToggleDarkMode={toggleDarkMode} // Pass dark mode toggle function to header
+        />
         {showFeedForm && (
           <div className="modal-overlay">
             <FeedForm
@@ -90,7 +90,7 @@ function App() {
           </div>
           <div className="right-panel">
             {selectedFeedId ? (
-              <FeedItemList feedId={selectedFeedId} setRefreshTrigger={setRefreshTrigger}/>
+              <FeedItemList feedId={selectedFeedId} />
             ) : (
               <div className="placeholder">
                 <h2>Select a feed to see its items</h2>
