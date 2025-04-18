@@ -1,19 +1,27 @@
 // src/components/FeedItemList.js
 import React, { useState, useEffect } from "react";
 import "../css/FeedItemList.css";
-import { sanitizeAndTransform } from "../utils/sanitizeHtml";
+import FeedItemCard from "./FeedItemCard";
 
-function FeedItemList({ feedId }) {
+function FeedItemList({ feedId, onItemMarkedRead }) {
   const [feedItems, setFeedItems] = useState([]);
   const [feedTitle, setFeedTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [viewReadOnly, setViewReadOnly] = useState(false);
+  const [viewStarredOnly, setViewStarredOnly] = useState(false);
 
+  // Determine the API URL based on starred toggle.
+  const feedItemsUrl =
+    viewStarredOnly
+      ? `http://localhost:8080/api/feed-items/for-feed/${feedId}/starred`
+      : `http://localhost:8080/api/feed-items/for-feed/${feedId}`;
+
+  // Fetch feed items when feedId or feedItemsUrl changes.
   useEffect(() => {
     if (!feedId) return;
     setLoading(true);
-    fetch(`http://localhost:8080/api/feed-items/for-feed/${feedId}`)
+    fetch(feedItemsUrl)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Network response was not ok for feed items");
@@ -29,11 +37,15 @@ function FeedItemList({ feedId }) {
         setError(err.message);
         setLoading(false);
       });
-  }, [feedId]);
+  }, [feedId, feedItemsUrl]);
 
-  // Fetch feed details to get the feed title
+  // Fetch feed details for title (or use default if feedId is "starred")
   useEffect(() => {
     if (!feedId) return;
+    if (feedId === "starred") {
+      setFeedTitle("Starred Feeds");
+      return;
+    }
     fetch(`http://localhost:8080/api/feeds/${feedId}`)
       .then((res) => {
         if (!res.ok) {
@@ -42,11 +54,10 @@ function FeedItemList({ feedId }) {
         return res.json();
       })
       .then((data) => setFeedTitle(data.title))
-      .catch((err) => {
-        console.error("Failed to fetch feed details", err);
-      });
+      .catch((err) => console.error("Failed to fetch feed details", err));
   }, [feedId]);
 
+  // Mark a single item as read and trigger parent's unread count refresh.
   const markItemAsRead = (itemId) => {
     const updatedItems = feedItems.map((item) =>
       item.id === itemId ? { ...item, read: true } : item
@@ -56,9 +67,18 @@ function FeedItemList({ feedId }) {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ read: true }),
-    }).catch((err) => console.error("Failed to update feed item as read", err));
+    })
+      .then(() => {
+        if (typeof onItemMarkedRead === "function") {
+          onItemMarkedRead();
+        }
+      })
+      .catch((err) =>
+        console.error("Failed to update feed item as read", err)
+      );
   };
 
+  // Mark all items as read.
   const markAllAsRead = () => {
     const updatedItems = feedItems.map((item) => ({ ...item, read: true }));
     setFeedItems(updatedItems);
@@ -71,26 +91,43 @@ function FeedItemList({ feedId }) {
         console.error("Failed to mark feed item as read:", err)
       );
     });
+    if (typeof onItemMarkedRead === "function") {
+      onItemMarkedRead();
+    }
   };
 
+  // Toggle read/unread view.
   const toggleView = () => {
     setViewReadOnly((prev) => !prev);
   };
 
-  const displayedItems = feedItems.filter((item) =>
-    viewReadOnly ? item.read : !item.read
-  );
+  // Toggle starred view.
+  const toggleStarredView = () => {
+    setViewStarredOnly((prev) => !prev);
+  };
 
-  const renderDescription = (description) => {
-    if (typeof description === "string") {
-      return sanitizeAndTransform(description);
-    } else if (description && typeof description === "object") {
-      if (description.value) {
-        return sanitizeAndTransform(description.value);
-      }
-      return sanitizeAndTransform(JSON.stringify(description));
-    }
-    return "";
+  // Filtering: if viewing starred only, show all starred items; otherwise, apply read/unread filter.
+  const displayedItems = viewStarredOnly
+    ? feedItems
+    : feedItems.filter((item) => (viewReadOnly ? item.read : !item.read));
+
+  // Toggle star status.
+  const toggleStar = (itemId) => {
+    fetch(`http://localhost:8080/api/feed-items/${itemId}/toggle-star`, {
+      method: "PATCH",
+    })
+      .then(() => {
+        const updatedItems = feedItems.map((i) =>
+          i.id === itemId ? { ...i, starred: !i.starred } : i
+        );
+        setFeedItems(updatedItems);
+      })
+      .catch((err) => console.error("Failed to toggle star", err));
+  };
+
+  // Open the "Read More" link.
+  const openReadMore = (item) => {
+    window.open(item.feedLink, "_blank", "noopener,noreferrer");
   };
 
   if (loading) return <div>Loading feed items...</div>;
@@ -107,6 +144,9 @@ function FeedItemList({ feedId }) {
           <button className="btn btn-toggle-view" onClick={toggleView}>
             {viewReadOnly ? "View Unread" : "View Read"}
           </button>
+          <button className="btn btn-toggle-starred" onClick={toggleStarredView}>
+            {viewStarredOnly ? "View All Items" : "View Starred Only"}
+          </button>
         </div>
       </header>
       {displayedItems.length === 0 ? (
@@ -114,33 +154,13 @@ function FeedItemList({ feedId }) {
       ) : (
         <div className="feed-card-container">
           {displayedItems.map((item) => (
-            <div key={item.id} className="feed-item-card">
-              <h3>{item.title || "No Title Available"}</h3>
-              <div className="item-description">
-                {renderDescription(item.description)}
-              </div>
-              <p>
-                <small>{new Date(item.publishedDate).toLocaleString()}</small>
-              </p>
-              <div className="feed-item-card-actions">
-                <button
-                  className="btn btn-read-more"
-                  onClick={() =>
-                    window.open(item.feedLink, "_blank", "noopener,noreferrer")
-                  }
-                >
-                  Open Link
-                </button>
-                {!item.read && (
-                  <button
-                    className="btn btn-mark-read-individual"
-                    onClick={() => markItemAsRead(item.id)}
-                  >
-                    Mark as Read
-                  </button>
-                )}
-              </div>
-            </div>
+            <FeedItemCard
+              key={item.id}
+              item={item}
+              onMarkAsRead={markItemAsRead}
+              onToggleStar={toggleStar}
+              onReadMore={openReadMore}
+            />
           ))}
         </div>
       )}

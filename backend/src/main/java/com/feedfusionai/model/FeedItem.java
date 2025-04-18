@@ -22,4 +22,5 @@ public class FeedItem {
     // New fields for additional content
     private String description;
     private Boolean read;
+    private boolean starred;
 }

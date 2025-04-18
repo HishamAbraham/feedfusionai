@@ -40,6 +40,7 @@ dependencies {
 	implementation 'org.apache.httpcomponents.core5:httpcore5-h2:5.2.3'
 	implementation 'com.rometools:rome:2.1.0'
 	implementation 'com.rometools:rome-modules:2.1.0'
+	implementation 'org.jsoup:jsoup:1.19.1'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'

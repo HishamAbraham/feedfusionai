@@ -1,11 +1,58 @@
 /* App.css */
 
+:root {
+  --background-color: #ffffff;
+  --primary-text-color: #333333;
+  --secondary-text-color: #777777;
+
+  --card-shadow: rgba(0, 0, 0, 0.05);
+  --card-background: #ffffff;
+  --card-shadow-color: rgba(0, 0, 0, 0.1);
+  --border-color: #ccc;
+
+  --accent-color: #0984e3;  /* Buttons, highlights */
+  --accent-hover: #087dc2;
+  --accent-contrast: #ffffff;
+
+  --danger-color: #d63031;  /* e.g., for unread badges */
+  --success-color: #00b894; /* e.g., for success states */
+}
+
+/* Dark theme overrides */
+.dark-mode {
+  --background-color: #202124;
+  --primary-text-color: #e8eaed;
+  --secondary-text-color: #bdc1c6;
+
+  --card-background: #2f2f2f;
+  --card-shadow-color: rgba(0, 0, 0, 0.5);
+  --border-color: #5f6368;
+
+  --accent-color: #8ab4f8;
+  --accent-hover: #5f9cf0;
+  --accent-contrast: #1c1c1c;
+
+  --danger-color: #ff5c5c;
+  --success-color: #6edfa7;
+}
+
+/* Generic body/container */
+body {
+  background-color: var(--background-color);
+  color: var(--primary-text-color);
+  font-family: Arial, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   font-family: Arial, sans-serif;
-  background-color: #f4f6f8;
+  background-color: var(--background-color);
+  color: var(--primary-text-color);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Header styles (for a Header component) */
@@ -50,11 +97,11 @@
   justify-content: center;
   z-index: 1000;
 }
-/* In your App.css */
+
 .left-panel {
   width: 30%;
   border-right: 1px solid #ccc;
-  padding: 10px; /* Reduced padding from 20px to 10px */
+  padding: 10px;  /* Reduced padding from 20px to 10px */
   overflow-y: auto;
   background-color: #f9f9f9;
 }

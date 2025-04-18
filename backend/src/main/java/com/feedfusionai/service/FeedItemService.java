@@ -28,6 +28,10 @@ public class FeedItemService {
         return feedItemRepository.findByReadFalse();
     }
 
+    public List<FeedItem> getStaredFeedItem() {
+        return feedItemRepository.findByStarredTrue();
+    }
+
     // Retrieve all feed items for a given feed
     public List<FeedItem> getFeedItemsByFeedId(String feedId) {
         return feedItemRepository.findByFeedId(feedId);
@@ -36,6 +40,11 @@ public class FeedItemService {
     public List<FeedItem> getUnreadFeedItemsByFeedId(String feedId) {
         return feedItemRepository.findByFeedIdAndReadFalse(feedId);
     }
+
+    public List<FeedItem> getStaredFeedItemsByFeedId(String feedId) {
+        return feedItemRepository.findByFeedIdAndStarredTrue(feedId);
+    }
+
 
     public Optional<FeedItem> findByFeedLink(String link) {
         return feedItemRepository.findByFeedLink(link);
@@ -66,8 +75,18 @@ public class FeedItemService {
         });
     }
 
+    public Optional<FeedItem> toggleFeedIemStar(String id) {
+        return feedItemRepository.findById(id).map(existingItem -> {
+            existingItem.setStarred(!existingItem.isStarred());
+            // Add or update additional fields as necessary
+            return feedItemRepository.save(existingItem);
+        });
+    }
+
     // Delete a feed item by its ID
     public void deleteFeedItem(String id) {
         feedItemRepository.deleteById(id);
     }
+
+
 }
