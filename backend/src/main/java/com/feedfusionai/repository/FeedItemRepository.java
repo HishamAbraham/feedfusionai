@@ -13,5 +13,8 @@ public interface FeedItemRepository extends MongoRepository<FeedItem, String> {
     long countByFeedIdAndReadFalse(String feedId);
     List<FeedItem> findByStarredTrue();
     List<FeedItem> findByFeedIdAndStarredTrue(String feedId);
+    void deleteByFeedId(String feedId);
+    /** true if an item with this feedLink already exists for this feedId */
+    boolean existsByFeedLinkAndFeedId(String feedLink, String feedId);
 
 }

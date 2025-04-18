@@ -1,64 +1,88 @@
+// src/components/FeedForm.js
 import React, { useState, useEffect } from "react";
-import "../css/FeedForm.css"; // Create a CSS file for any styles for your form
+import "../css/FeedForm.css";
 
-const FeedForm = ({ feed, onSubmit, onCancel }) => {
-  // Initialize state from the feed prop if available, otherwise use empty strings.
-  const [title, setTitle] = useState("");
-  const [url, setUrl] = useState("");
+const FeedForm = ({ feed, onSuccess, onCancel }) => {
+  // Only store the URL in local state; title comes from the backend
+  const [url, setUrl] = useState(feed?.url || "");
+  const [error, setError] = useState("");
 
-  // When editing, pre-populate the fields with the provided feed data.
   useEffect(() => {
     if (feed) {
-      setTitle(feed.title || "");
-      setUrl(feed.url || "");
+      setUrl(feed.url);
     }
   }, [feed]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Create an object with the current form values
-    const feedData = { title, url };
-    onSubmit(feedData); // Pass data to the parent component (which handles either add or update)
+    setError("");
+
+    // Decide endpoint + method
+    const apiUrl = feed
+        ? `http://localhost:8080/api/feeds/${feed.id}`
+        : "http://localhost:8080/api/feeds";
+    const method = feed ? "PATCH" : "POST";
+
+    try {
+      const res = await fetch(apiUrl, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      if (!res.ok) {
+        // try to parse a message, or fallback to status
+        const text = await res.text();
+        throw new Error(text || `${res.status} ${res.statusText}`);
+      }
+      // Success! notify parent to reload list, then close the form
+      onSuccess();
+      onCancel();
+    } catch (err) {
+      // Show the error in the form, let user correct URL
+      setError(err.message);
+    }
   };
 
   return (
-    <div className="feed-form-container">
-      <h2>{feed ? "Edit Feed" : "Add New Feed"}</h2>
-      <form onSubmit={handleSubmit} className="feed-form">
-        <div className="form-group">
-          <label htmlFor="feedTitle">Title:</label>
-          <input
-            id="feedTitle"
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter feed title"
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="feedUrl">URL:</label>
-          <input
-            id="feedUrl"
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Enter feed URL"
-            required
-          />
-        </div>
-        <div className="form-actions">
-          <button type="submit" className="btn btn-submit">
-            {feed ? "Update Feed" : "Add Feed"}
-          </button>
-          {onCancel && (
-            <button type="button" className="btn btn-cancel" onClick={onCancel}>
+      <div className="feed-form-container">
+        <h2>{feed ? "Edit Feed" : "Add New Feed"}</h2>
+
+        {error && <div className="form-error">{error}</div>}
+
+        <form onSubmit={handleSubmit} className="feed-form">
+          {feed && (
+              <div className="form-group">
+                <label>Title:</label>
+                <input type="text" value={feed.title} disabled />
+              </div>
+          )}
+
+          <div className="form-group">
+            <label htmlFor="feedUrl">URL:</label>
+            <input
+                id="feedUrl"
+                type="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="Enter feed URL"
+                required
+            />
+          </div>
+
+          <div className="form-actions">
+            <button type="submit" className="btn btn-submit">
+              {feed ? "Update Feed" : "Add Feed"}
+            </button>
+            <button
+                type="button"
+                className="btn btn-cancel"
+                onClick={onCancel}
+            >
               Cancel
             </button>
-          )}
-        </div>
-      </form>
-    </div>
+          </div>
+        </form>
+      </div>
   );
 };
 

@@ -4,6 +4,7 @@ import com.feedfusionai.model.Feed;
 import com.feedfusionai.service.FeedScannerService;
 import com.feedfusionai.service.FeedService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -40,9 +41,9 @@ public class FeedController {
     }
 
     @PostMapping
-    public Feed addFeed(@RequestBody Feed feed) {
-        logger.debug("Creating feed {}", feed);
-        return feedService.addFeed(feed);
+    public ResponseEntity<Feed> createFeed(@RequestBody Feed feed) {
+        Feed created = feedService.addFeed(feed);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PatchMapping("/{id}")
@@ -61,11 +62,10 @@ public class FeedController {
     }
 
     @PatchMapping("/refresh")
-    public ResponseEntity<String> refreshFeeds() throws Exception {
-        logger.debug("Refreshing feeds");
-        // Trigger the feed scanning and wait for the result
-        CompletableFuture<Integer> newItemsFuture = feedScannerService.scanFeeds();
-        int totalNewItems = newItemsFuture.get(); // Block until completed; consider async handling for production
-        return ResponseEntity.ok("Feeds refreshed successfully, " + totalNewItems + " new items added.");
+    public ResponseEntity<String> refreshFeeds() {
+        // Launch the scan (async if you have @Async on scanFeeds)
+        feedScannerService.scanFeeds();
+        // Immediately acknowledge
+        return ResponseEntity.ok("Feed scan initiated");
     }
 }
