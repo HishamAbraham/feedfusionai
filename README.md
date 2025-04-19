@@ -60,11 +60,44 @@ feedfusionai/
 
 ---
 
-## Installation
+## Getting Started
+
+These instructions will help you run the application locally.
 
 ### Prerequisites
 
-- Java 11+
-- Node.js and npm
-- Docker and Docker Compose
-- A running MongoDB instance (or use Docker to run one)
+- Java 17
+- Node.js (v16+)
+- Docker & Docker Compose (optional, for containerized setup)
+- MongoDB (running locally or via Docker)
+  - Install locally via your system package manager (e.g. `brew install mongodb-community@6.0` on macOS or via apt/yum on Linux)  
+  - Or spin up a container with Docker:
+    ```bash
+    docker run -d --name feedfusion-mongo -p 27017:27017 mongo:6.0
+    ```
+
+### Backend Setup
+
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+2. Build and run the Spring Boot app:
+    ```bash
+    ./gradlew bootRun
+    ```
+### Frontend Setup
+
+1.	In a separate terminal, navigate to the frontend directory:
+    ```bash
+    cd frontend
+    ```
+2. Install dependencies:
+    ```bash
+    npm install
+    ```
+3. 	Start the development server:
+    ```bash
+    npm start
+    ```
+
