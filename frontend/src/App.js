@@ -1,6 +1,6 @@
 // src/App.js
-import React, { useState } from "react";
-import { BrowserRouter as Router } from "react-router-dom";
+import React, {useState} from "react";
+import {BrowserRouter as Router} from "react-router-dom";
 import Header from "./components/Header";
 import FeedDashboard from "./components/FeedDashboard";
 import FeedItemList from "./components/FeedItemList";
@@ -40,7 +40,7 @@ function App() {
     const handleRefreshFeeds = () => {
         setRefreshResult(null);
         setIsRefreshing(true);
-        fetch("http://localhost:8080/api/feeds/refresh", { method: "PATCH" })
+        fetch("http://localhost:8080/api/feeds/refresh", {method: "PATCH"})
             .then((res) => {
                 if (!res.ok) throw new Error("Refresh failed");
                 return res.json();
@@ -72,7 +72,7 @@ function App() {
 
         fetch(url, {
             method,
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(feedData),
         })
             .then((res) => {
@@ -132,7 +132,10 @@ function App() {
                     </div>
                     <div className="right-panel">
                         {selectedFeedId ? (
-                            <FeedItemList feedId={selectedFeedId} />
+                            <FeedItemList
+                                feedId={selectedFeedId}
+                                onItemMarkedRead={() => setRefreshTrigger(prev => prev + 1)}
+                            />
                         ) : (
                             <div className="placeholder">
                                 <h2>Select a feed to see its items</h2>
