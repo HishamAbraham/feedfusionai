@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import FeedDashboard from "./components/FeedDashboard";
 import FeedItemList from "./components/FeedItemList";
 import FeedForm from "./components/FeedForm";
+import { API_BASE } from "./config";
 import "./css/App.css";
 
 function App() {
@@ -40,7 +41,7 @@ function App() {
     const handleRefreshFeeds = () => {
         setRefreshResult(null);
         setIsRefreshing(true);
-        fetch("http://localhost:8080/api/feeds/refresh", {method: "PATCH"})
+        fetch(`${API_BASE}/feeds/refresh`, {method: "PATCH"})
             .then((res) => {
                 if (!res.ok) throw new Error("Refresh failed");
                 return res.json();
@@ -67,8 +68,8 @@ function App() {
     const handleFormSubmit = (feedData) => {
         const method = editingFeed ? "PATCH" : "POST";
         const url = editingFeed
-            ? `http://localhost:8080/api/feeds/${editingFeed.id}`
-            : "http://localhost:8080/api/feeds";
+            ? `${API_BASE}/feeds/${editingFeed.id}`
+            : `${API_BASE}/feeds`;
 
         fetch(url, {
             method,

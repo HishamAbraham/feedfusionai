@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/FeedItemList.css";
 import FeedItemCard from "./FeedItemCard";
+import {API_BASE} from "../config";
 
 function FeedItemList({ feedId, onItemMarkedRead }) {
   const [feedItems, setFeedItems] = useState([]);
@@ -14,8 +15,8 @@ function FeedItemList({ feedId, onItemMarkedRead }) {
   // Determine the API URL based on starred toggle.
   const feedItemsUrl =
     viewStarredOnly
-      ? `http://localhost:8080/api/feed-items/for-feed/${feedId}/starred`
-      : `http://localhost:8080/api/feed-items/for-feed/${feedId}`;
+      ? `${API_BASE}/feed-items/for-feed/${feedId}/starred`
+      : `${API_BASE}/feed-items/for-feed/${feedId}`;
 
   // Fetch feed items when feedId or feedItemsUrl changes.
   useEffect(() => {
@@ -46,7 +47,7 @@ function FeedItemList({ feedId, onItemMarkedRead }) {
       setFeedTitle("Starred Feeds");
       return;
     }
-    fetch(`http://localhost:8080/api/feeds/${feedId}`)
+    fetch(`${API_BASE}/feeds/${feedId}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Network response was not ok for feed details");
@@ -63,7 +64,7 @@ function FeedItemList({ feedId, onItemMarkedRead }) {
       item.id === itemId ? { ...item, read: true } : item
     );
     setFeedItems(updatedItems);
-    fetch(`http://localhost:8080/api/feed-items/${itemId}/mark-read`, {
+    fetch(`${API_BASE}/feed-items/${itemId}/mark-read`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ read: true }),
@@ -83,7 +84,7 @@ function FeedItemList({ feedId, onItemMarkedRead }) {
     const updatedItems = feedItems.map((item) => ({ ...item, read: true }));
     setFeedItems(updatedItems);
     updatedItems.forEach((item) => {
-      fetch(`http://localhost:8080/api/feed-items/${item.id}/mark-read`, {
+      fetch(`${API_BASE}/feed-items/${item.id}/mark-read`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ read: true }),
@@ -113,7 +114,7 @@ function FeedItemList({ feedId, onItemMarkedRead }) {
 
   // Toggle star status.
   const toggleStar = (itemId) => {
-    fetch(`http://localhost:8080/api/feed-items/${itemId}/toggle-star`, {
+    fetch(`${API_BASE}/feed-items/${itemId}/toggle-star`, {
       method: "PATCH",
     })
       .then(() => {
