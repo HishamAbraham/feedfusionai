@@ -1,8 +1,10 @@
-import { render, screen } from '@testing-library/react';
-import App from './App';
+// frontend/src/App.test.js
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import App from "./App";
 
-test('renders learn react link', () => {
+test("renders header and placeholder on startup", () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  expect(screen.getByText(/Feed Fusion AI/i)).toBeInTheDocument();
+  expect(screen.getByText(/Select a feed to see its items/i)).toBeInTheDocument();
 });
