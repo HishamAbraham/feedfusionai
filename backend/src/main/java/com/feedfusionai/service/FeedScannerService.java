@@ -1,6 +1,6 @@
 package com.feedfusionai.service;
 
-import com.feedfusionai.controller.FeedController;
+
 import com.feedfusionai.model.Feed;
 import com.feedfusionai.model.FeedItem;
 import com.feedfusionai.repository.FeedRepository;
@@ -42,7 +42,8 @@ public class FeedScannerService {
         this.feedItemRepository = feedItemRepository;
     }
 
-    public void scanFeeds() {
+    public int scanFeeds() {
+        int newCount = 0;
         List<Feed> feeds = feedRepository.findAll();
         for (Feed f : feeds) {
             try {
@@ -78,7 +79,7 @@ public class FeedScannerService {
                 List<FeedItem> items = parseFeedContent(raw);
 
                 // 4) Dedupe & save new items
-                int newCount = 0;
+
                 for (FeedItem item : items) {
                     if (!feedItemRepository.existsByFeedLinkAndFeedId(item.getFeedLink(), f.getId())) {
                         item.setFeedId(f.getId());
@@ -98,6 +99,7 @@ public class FeedScannerService {
                 logger.error("Error scanning feed {}: {}", f.getUrl(), ex.getMessage());
             }
         }
+        return newCount;
     }
 
     /** Heuristic: does this string look like an HTML page? */
