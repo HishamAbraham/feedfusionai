@@ -4,7 +4,7 @@ import "../css/Header.css";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPlus, faSyncAlt, faMoon, faSun} from "@fortawesome/free-solid-svg-icons"; // ② add plus & sync
 
-function Header({onAddFeed, onRefreshFeeds, onToggleDarkMode, darkMode}) {
+function Header({onAddFeed, onRefreshFeeds, onToggleDarkMode, darkMode, isRefreshing}) {
     return (
         <header className="app-header">
             <img
@@ -32,7 +32,7 @@ function Header({onAddFeed, onRefreshFeeds, onToggleDarkMode, darkMode}) {
                     onClick={onRefreshFeeds}
                     title="Refresh Feeds"
                 >
-                    <FontAwesomeIcon icon={faSyncAlt}/> Refresh
+                    <FontAwesomeIcon icon={faSyncAlt} spin={isRefreshing} /> Refresh
                 </button>
 
                 <button

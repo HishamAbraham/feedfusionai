@@ -10,50 +10,60 @@ import "./css/App.css";
 function App() {
     const [selectedFeedId, setSelectedFeedId] = useState(null);
 
-    // Controls the add/edit modal
+    // Add/Edit form modal
     const [showFeedForm, setShowFeedForm] = useState(false);
     const [editingFeed, setEditingFeed] = useState(null);
 
-    // For dark mode
+    // Dark mode toggle
     const [darkMode, setDarkMode] = useState(false);
 
-    // Bump this to force FeedDashboard to refetch
+    // Force-feed-refresh trigger
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-    // === Handlers ===
+    // Refresh button spinner + result banner
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [refreshResult, setRefreshResult] = useState(null);
 
-    // Header "Add Feed" button
+    // Open blank Add Feed form
     const handleAddFeed = () => {
         setEditingFeed(null);
         setShowFeedForm(true);
     };
 
-    // Dashboard "Edit" button
+    // Open Edit Feed form
     const handleEditFeed = (feed) => {
         setEditingFeed(feed);
         setShowFeedForm(true);
     };
 
-    // Header "Refresh Feeds" button
+    // Call backend PATCH /api/feeds/refresh, spin icon, show count
     const handleRefreshFeeds = () => {
-        console.log("Refreshing all feeds…");
+        setRefreshResult(null);
+        setIsRefreshing(true);
         fetch("http://localhost:8080/api/feeds/refresh", { method: "PATCH" })
             .then((res) => {
                 if (!res.ok) throw new Error("Refresh failed");
                 return res.json();
             })
-            .then(() => {
+            .then((newCount) => {
+                setIsRefreshing(false);
+                setRefreshResult(newCount);
                 setRefreshTrigger((prev) => prev + 1);
+                // auto-hide the banner after 3s
+                setTimeout(() => setRefreshResult(null), 3000);
             })
-            .catch((err) => console.error("Failed to refresh feeds", err));
+            .catch((err) => {
+                console.error("Failed to refresh feeds", err);
+                setIsRefreshing(false);
+            });
     };
 
-    // Header "Toggle Dark Mode" button
+    // Toggle light/dark CSS class
     const toggleDarkMode = () => {
         setDarkMode((prev) => !prev);
     };
 
-    // FeedForm onSuccess (add or edit)
+    // Handler passed to FeedForm for both add & edit
     const handleFormSubmit = (feedData) => {
         const method = editingFeed ? "PATCH" : "POST";
         const url = editingFeed
@@ -67,7 +77,7 @@ function App() {
         })
             .then((res) => {
                 if (!res.ok) {
-                    throw new Error(`Save failed: ${res.status} ${res.statusText}`);
+                    throw new Error(`Save failed: ${res.status}`);
                 }
                 return res.json();
             })
@@ -77,16 +87,14 @@ function App() {
             })
             .catch((err) => {
                 console.error("Failed to save feed", err);
-                // You may want to surface this in the form; FeedForm handles its own errors
             });
     };
 
-    // Cancel button in FeedForm
+    // Close Add/Edit modal
     const handleCancelForm = () => {
         setShowFeedForm(false);
     };
 
-    // === Render ===
     return (
         <Router>
             <div className={`app-container ${darkMode ? "dark-mode" : ""}`}>
@@ -95,7 +103,14 @@ function App() {
                     onRefreshFeeds={handleRefreshFeeds}
                     onToggleDarkMode={toggleDarkMode}
                     darkMode={darkMode}
+                    isRefreshing={isRefreshing}
                 />
+
+                {refreshResult !== null && (
+                    <div className="refresh-banner">
+                        🚀 {refreshResult} new items added
+                    </div>
+                )}
 
                 {showFeedForm && (
                     <div className="modal-overlay">

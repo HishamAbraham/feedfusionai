@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,10 +61,8 @@ public class FeedController {
     }
 
     @PatchMapping("/refresh")
-    public ResponseEntity<String> refreshFeeds() {
-        // Launch the scan (async if you have @Async on scanFeeds)
-        feedScannerService.scanFeeds();
-        // Immediately acknowledge
-        return ResponseEntity.ok("Feed scan initiated");
+    public ResponseEntity<Integer> refreshFeeds() {
+        int added = feedScannerService.scanFeeds();
+        return ResponseEntity.ok(added);
     }
 }
