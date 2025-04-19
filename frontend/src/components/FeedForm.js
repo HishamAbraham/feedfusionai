@@ -1,5 +1,6 @@
 // src/components/FeedForm.js
 import React, { useState, useEffect } from "react";
+import { API_BASE } from "../config";
 import "../css/FeedForm.css";
 
 const FeedForm = ({ feed, onSuccess, onCancel }) => {
@@ -19,8 +20,8 @@ const FeedForm = ({ feed, onSuccess, onCancel }) => {
 
     // Decide endpoint + method
     const apiUrl = feed
-        ? `http://localhost:8080/api/feeds/${feed.id}`
-        : "http://localhost:8080/api/feeds";
+        ? `${API_BASE}/feeds/${feed.id}`
+        : `${API_BASE}/feeds`;
     const method = feed ? "PATCH" : "POST";
 
     try {

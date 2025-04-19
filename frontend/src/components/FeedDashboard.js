@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import FeedForm from "./FeedForm";
 import "../css/FeedDashboard.css";
+import {API_BASE} from "../config";
 
 function FeedDashboard({ onSelectFeed, refreshTrigger }) {
   const [feeds, setFeeds] = useState([]);
@@ -9,7 +10,7 @@ function FeedDashboard({ onSelectFeed, refreshTrigger }) {
   const [currentFeed, setCurrentFeed] = useState(null);
 
   const fetchFeeds = () => {
-    fetch("http://localhost:8080/api/feeds")
+    fetch(`${API_BASE}/feeds`)
         .then((res) => res.json())
         .then(setFeeds)
         .catch((err) => console.error("Failed to fetch feeds", err));
@@ -26,8 +27,8 @@ function FeedDashboard({ onSelectFeed, refreshTrigger }) {
   const handleFormSubmit = (feedData) => {
     const method = currentFeed ? "PATCH" : "POST";
     const url = currentFeed
-        ? `http://localhost:8080/api/feeds/${currentFeed.id}`
-        : "http://localhost:8080/api/feeds";
+        ? `${API_BASE}/feeds/${currentFeed.id}`
+        : `${API_BASE}api/feeds`;
 
     fetch(url, {
       method,
@@ -46,7 +47,7 @@ function FeedDashboard({ onSelectFeed, refreshTrigger }) {
 
   const handleDeleteFeed = (feedId, e) => {
     e.stopPropagation();
-    fetch(`http://localhost:8080/api/feeds/${feedId}`, { method: "DELETE" })
+    fetch(`${API_BASE}/feeds/${feedId}`, { method: "DELETE" })
         .then(() => fetchFeeds())
         .catch((err) => console.error("Failed to delete feed", err));
   };

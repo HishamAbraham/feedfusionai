@@ -30,16 +30,19 @@ public class FeedScannerService {
 
     private final FeedRepository feedRepository;
     private final FeedItemRepository feedItemRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
 
     private static final Logger logger = LoggerFactory.getLogger(FeedScannerService.class);
 
+    private final RestTemplate restTemplate;
+
     public FeedScannerService(
             FeedRepository feedRepository,
-            FeedItemRepository feedItemRepository
+            FeedItemRepository feedItemRepository,
+            RestTemplate restTemplate    // ← add this
     ) {
         this.feedRepository     = feedRepository;
         this.feedItemRepository = feedItemRepository;
+        this.restTemplate       = restTemplate;    // ← assign here
     }
 
     public int scanFeeds() {
