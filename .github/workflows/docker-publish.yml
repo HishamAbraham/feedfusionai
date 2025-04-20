@@ -4,7 +4,7 @@ on:
   # Only when you publish a GitHub Release
   release:
     types: [published]
-  # Or trigger manually from the Actions tab
+  # Also allow manual dispatch from the Actions tab
   workflow_dispatch:
 
 jobs:
