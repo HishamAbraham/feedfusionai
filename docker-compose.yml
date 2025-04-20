@@ -1,34 +1,58 @@
 version: '3.8'
 
+networks:
+  feedfusion-net:
+    driver: bridge
+
 services:
   mongo:
     image: mongo:6.0
     container_name: feedfusionai-mongo
+    restart: unless-stopped
     volumes:
       - mongo-data:/data/db
     ports:
       - '27018:27017'    # host 27018 → container 27017
+    networks:
+      - feedfusion-net
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     image: hishamabraham/feedfusionai-backend:latest
     container_name: feedfusionai-backend
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
     environment:
+      - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/feedfusionai
       - SERVER_PORT=8080
-    depends_on:
-      - mongo
+      - SPRING_USER=${SPRING_USER:-admin}          # can override via .env
+      - SPRING_PASSWORD=${SPRING_PASSWORD:-secret} # production credential
     ports:
       - '8081:8080'      # host 8081 → container 8080
+    networks:
+      - feedfusion-net
 
   frontend:
     image: hishamabraham/feedfusionai-frontend:latest
     container_name: feedfusionai-frontend
-    environment:
-      - REACT_APP_API_URL=http://localhost:8081/api
+    restart: unless-stopped
     depends_on:
-      - backend
+      backend:
+        condition: service_started
+    environment:
+      # point at the backend service by its Docker Compose name
+      - REACT_APP_API_URL=http://backend:8080/api
     ports:
       - '3001:80'        # host 3001 → container 80
+    networks:
+      - feedfusion-net
 
 volumes:
   mongo-data:
