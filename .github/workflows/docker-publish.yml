@@ -1,10 +1,11 @@
-# .github/workflows/docker-publish.yml
 name: Build & Publish Docker Images
 
 on:
+  # Only run when you publish a GitHub Release
   release:
-    types: [published]      # run when you publish a GitHub Release
-  workflow_dispatch:        # also allow manual runs
+    types: [published]
+  # Also allow manual runs via the Actions tab
+  workflow_dispatch:
 
 jobs:
   build-and-publish:
@@ -14,7 +15,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: Set up QEMU
+      - name: Set up QEMU (for multi‑arch)
         uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
@@ -29,15 +30,15 @@ jobs:
       - name: Build & Push Backend image
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: ./backend/Dockerfile
+          context: ./backend          # point at the backend folder
+          file: Dockerfile           # the Dockerfile inside backend/
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-backend:latest
 
       - name: Build & Push Frontend image
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: ./frontend/Dockerfile
+          context: ./frontend        # point at the frontend folder
+          file: Dockerfile           # the Dockerfile inside frontend/
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-frontend:latest
