@@ -1,3 +1,5 @@
+# .github/workflows/docker-publish.yml
+
 name: Build & Publish Docker Images
 
 on:
@@ -15,8 +17,10 @@ jobs:
 
       - name: Debug working directory
         run: |
-          echo "Current directory: $(pwd)"
-          echo "Contents:"
+          echo "==== pwd ===="
+          pwd
+          echo
+          echo "==== ls -R . ===="
           ls -R .
 
       - name: Set up QEMU (for multi‑arch)
@@ -35,7 +39,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./backend/Dockerfile
+          file: backend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-backend:latest
 
@@ -43,6 +47,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./frontend/Dockerfile
+          file: frontend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-frontend:latest
