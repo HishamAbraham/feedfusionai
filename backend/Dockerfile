@@ -1,16 +1,25 @@
-# Stage 1: compile and package
-FROM maven:3.8.7-eclipse-temurin-17 AS build
+# Stage 1: build with Gradle
+FROM gradle:7.6-jdk17 AS build
 WORKDIR /workspace
-COPY pom.xml .
-COPY src ./src
-RUN mvn clean package -DskipTests
+
+# copy only the wrapper and build files first (for caching)
+COPY gradlew .
+COPY gradle ./gradle
+COPY build.gradle settings.gradle ./
+
+# download dependencies
+RUN ./gradlew --no-daemon dependencies || true
+
+# now copy the rest of the code & assemble
+COPY . .
+RUN ./gradlew --no-daemon clean bootJar
 
 # Stage 2: runtime image
 FROM eclipse-temurin:17-jre
-LABEL authors="hishamabraham"
 WORKDIR /app
-# copy the fat jar from the build stage
-COPY --from=build /workspace/target/feedfusionai-backend-*.jar app.jar
+
+# pull in the fat JAR produced by Spring Boot
+COPY --from=build /workspace/build/libs/*.jar app.jar
 
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","app.jar"]
