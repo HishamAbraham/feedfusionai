@@ -1,5 +1,4 @@
 # .github/workflows/docker-publish.yml
-
 name: Build & Publish Docker Images
 
 on:
@@ -14,14 +13,6 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3
-
-      - name: Debug working directory
-        run: |
-          echo "==== pwd ===="
-          pwd
-          echo
-          echo "==== ls -R . ===="
-          ls -R .
 
       - name: Set up QEMU (for multi‑arch)
         uses: docker/setup-qemu-action@v2
@@ -38,15 +29,19 @@ jobs:
       - name: Build & Push Backend image
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: backend
           file: backend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-backend:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-backend:${{ github.sha }}
 
       - name: Build & Push Frontend image
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: frontend
           file: frontend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-frontend:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-frontend:${{ github.sha }}
