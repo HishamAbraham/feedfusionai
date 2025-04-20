@@ -1,17 +1,16 @@
+# Stage 1: compile and package
+FROM maven:3.8.7-eclipse-temurin-17 AS build
+WORKDIR /workspace
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# Stage 2: runtime image
+FROM eclipse-temurin:17-jre
 LABEL authors="hishamabraham"
+WORKDIR /app
+# copy the fat jar from the build stage
+COPY --from=build /workspace/target/feedfusionai-backend-*.jar app.jar
 
-# Stage 1: build
-FROM gradle:7.6-jdk17 as builder
-WORKDIR /home/gradle/project
-COPY --chown=gradle:gradle . .
-RUN gradle bootJar --no-daemon -x test
-
-# Stage 2: runtime
-FROM eclipse-temurin:17-jre-jammy
-VOLUME /tmp
-COPY --from=builder /home/gradle/project/build/libs/feedfusionai-backend-0.0.1-SNAPSHOT.jar /app/app.jar
-
-# expose port
 EXPOSE 8080
-
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
