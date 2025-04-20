@@ -1,30 +1,34 @@
 version: '3.8'
+
 services:
   mongo:
     image: mongo:6.0
+    container_name: feedfusionai-mongo
     volumes:
       - mongo-data:/data/db
     ports:
-      - '27017:27017'
+      - '27018:27017'    # host 27018 → container 27017
 
   backend:
     image: hishamabraham/feedfusionai-backend:latest
+    container_name: feedfusionai-backend
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/feedfusionai
       - SERVER_PORT=8080
     depends_on:
       - mongo
     ports:
-      - '8080:8080'
+      - '8081:8080'      # host 8081 → container 8080
 
   frontend:
     image: hishamabraham/feedfusionai-frontend:latest
+    container_name: feedfusionai-frontend
     environment:
-      - REACT_APP_API_URL=http://backend:8080/api
+      - REACT_APP_API_URL=http://localhost:8081/api
     depends_on:
       - backend
     ports:
-      - '3000:80'
+      - '3001:80'        # host 3001 → container 80
 
 volumes:
   mongo-data:
