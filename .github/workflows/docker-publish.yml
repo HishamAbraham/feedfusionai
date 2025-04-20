@@ -1,10 +1,10 @@
 name: Build & Publish Docker Images
 
 on:
-  # Only run when you publish a GitHub Release
+  # only on a published GitHub Release
   release:
     types: [published]
-  # Also allow manual runs via the Actions tab
+  # also allow manual runs
   workflow_dispatch:
 
 jobs:
@@ -21,24 +21,24 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Log in to Docker Hub
+      - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build & Push Backend image
+      - name: Build & push Backend image
         uses: docker/build-push-action@v4
         with:
-          context: ./backend          # point at the backend folder
-          file: ./backend/Dockerfile           # the Dockerfile inside backend/
+          context: ./backend
+          file: Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-backend:latest
 
-      - name: Build & Push Frontend image
+      - name: Build & push Frontend image
         uses: docker/build-push-action@v4
         with:
-          context: ./frontend        # point at the frontend folder
-          file: ./frontend/Dockerfile           # the Dockerfile inside frontend/
+          context: ./frontend
+          file: Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-frontend:latest
