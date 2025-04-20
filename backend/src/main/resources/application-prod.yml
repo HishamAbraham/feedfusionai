@@ -1,0 +1,10 @@
+# src/main/resources/application-prod.yml
+
+spring:
+  security:
+    user:
+      name: admin           # replace with your real admin username
+      password: ${PROD_USER_PASSWORD}  # pulled from an env var
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI}

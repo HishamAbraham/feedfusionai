@@ -16,6 +16,13 @@ RUN ./gradlew --no-daemon clean bootJar
 
 # Stage 2: runtime image
 FROM eclipse-temurin:17-jre
+
+# Activate the prod profile by default
+ENV SPRING_PROFILES_ACTIVE=prod
+
+# Supply the production password via an env var placeholder
+ENV PROD_USER_PASSWORD=''
+
 WORKDIR /app
 
 # pull in the fat JAR produced by Spring Boot
