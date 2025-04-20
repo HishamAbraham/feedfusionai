@@ -1,10 +1,10 @@
 name: Build & Publish Docker Images
 
 on:
-  # Trigger when you publish a GitHub Release
+  # Only when you publish a GitHub Release
   release:
     types: [published]
-  # Also allow manual runs via the Actions UI
+  # Or trigger manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -36,15 +36,15 @@ jobs:
       - name: Build & Push Backend image
         uses: docker/build-push-action@v4
         with:
-          context: ./backend
-          file: Dockerfile
+          context: .
+          file: backend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-backend:latest
 
       - name: Build & Push Frontend image
         uses: docker/build-push-action@v4
         with:
-          context: ./frontend
-          file: Dockerfile
+          context: .
+          file: frontend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-frontend:latest
