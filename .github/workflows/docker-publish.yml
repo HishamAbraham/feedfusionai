@@ -31,7 +31,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./backend          # point at the backend folder
-          file: Dockerfile           # the Dockerfile inside backend/
+          file: ./backend/Dockerfile           # the Dockerfile inside backend/
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-backend:latest
 
@@ -39,6 +39,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./frontend        # point at the frontend folder
-          file: Dockerfile           # the Dockerfile inside frontend/
+          file: ./frontend/Dockerfile           # the Dockerfile inside frontend/
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-frontend:latest
