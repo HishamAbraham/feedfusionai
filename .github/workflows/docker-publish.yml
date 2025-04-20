@@ -3,8 +3,8 @@ name: Build & Publish Docker Images
 
 on:
   release:
-    types: [published]
-  workflow_dispatch:
+    types: [published]      # run when you publish a GitHub Release
+  workflow_dispatch:        # also allow manual runs
 
 jobs:
   build-and-publish:
@@ -29,15 +29,15 @@ jobs:
       - name: Build & Push Backend image
         uses: docker/build-push-action@v4
         with:
-          context: ./backend
-          file: Dockerfile
+          context: .
+          file: ./backend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-backend:latest
 
       - name: Build & Push Frontend image
         uses: docker/build-push-action@v4
         with:
-          context: ./frontend
-          file: Dockerfile
+          context: .
+          file: ./frontend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-frontend:latest
