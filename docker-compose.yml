@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:6.0
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - '27017:27017'
+
+  backend:
+    image: hishamabraham/feedfusionai-backend:latest
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/feedfusionai
+      - SERVER_PORT=8080
+    depends_on:
+      - mongo
+    ports:
+      - '8080:8080'
+
+  frontend:
+    image: hishamabraham/feedfusionai-frontend:latest
+    environment:
+      - REACT_APP_API_URL=http://backend:8080/api
+    depends_on:
+      - backend
+    ports:
+      - '3000:80'
+
+volumes:
+  mongo-data:
