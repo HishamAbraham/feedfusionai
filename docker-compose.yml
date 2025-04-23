@@ -10,7 +10,8 @@ services:
     container_name: feedfusionai-mongo
     restart: unless-stopped
     volumes:
-      - mongo-data:/data/db
+      - /volume1/docker/feedfusionai/db:/data/db
+      - /volume1/docker/feedfusionai/logs:/var/log/mongodb
     ports:
       - '27018:27017'    # host 27018 → container 27017
     networks:
@@ -53,6 +54,3 @@ services:
       - '3001:80'        # host 3001 → container 80
     networks:
       - feedfusion-net
-
-volumes:
-  mongo-data:
