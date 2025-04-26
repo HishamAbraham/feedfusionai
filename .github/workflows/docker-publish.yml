@@ -14,7 +14,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: Set up QEMU (for multi‑arch)
+      - name: Set up QEMU (for multi-arch)
         uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
@@ -33,6 +33,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3
+        with:
+          path: .
 
       - name: Build & Push Backend image
         uses: docker/build-push-action@v4
@@ -50,6 +52,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3
+        with:
+          path: .
 
       - name: Build & Push Frontend image
         uses: docker/build-push-action@v4
