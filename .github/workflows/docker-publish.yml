@@ -42,6 +42,8 @@ jobs:
           context: frontend
           file: frontend/Dockerfile
           push: true
+          build-args: |
+            REACT_APP_API_URL=/api
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-frontend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/feedfusionai-frontend:${{ github.sha }}
