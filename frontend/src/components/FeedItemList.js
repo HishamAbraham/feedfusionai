@@ -130,27 +130,35 @@ function FeedItemList({ feedId, onItemMarkedRead, darkMode }) {
     window.open(item.feedLink, "_blank", "noopener,noreferrer");
   };
 
-  if (loading) return <div>Loading feed items...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return (
+    <div className="d-flex justify-content-center my-5">
+      <div className="spinner-border text-primary" role="status">
+        <span className="visually-hidden">Loading feed items...</span>
+      </div>
+    </div>
+  );
+  if (error) return <div className="alert alert-danger text-center">Error: {error}</div>;
 
   return (
     <div className="feed-item-list">
-      <header className="feed-item-list-header">
-        <h2>Feed Items for {feedTitle || "Feed"}</h2>
-        <div className="feed-item-list-buttons">
-          <button className="btn btn-mark-read" onClick={markAllAsRead}>
+      <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <h5 className="mb-0">Feed Items for {feedTitle || "Feed"}</h5>
+        <div className="btn-group">
+          <button className="btn btn-sm btn-outline-success" onClick={markAllAsRead}>
             Mark All As Read
           </button>
-          <button className="btn btn-toggle-view" onClick={toggleView}>
+          <button className="btn btn-sm btn-outline-primary" onClick={toggleView}>
             {viewReadOnly ? "View Unread" : "View Read"}
           </button>
-          <button className="btn btn-toggle-starred" onClick={toggleStarredView}>
+          <button className="btn btn-sm btn-outline-warning" onClick={toggleStarredView}>
             {viewStarredOnly ? "View All Items" : "View Starred Only"}
           </button>
         </div>
-      </header>
+      </div>
       {displayedItems.length === 0 ? (
-        <p>No feed items to display.</p>
+        <div className="alert alert-warning text-center">
+          No feed items to display. Please check your filters or add new feeds!
+        </div>
       ) : (
         <div className="feed-card-container">
           {displayedItems.map((item) => (

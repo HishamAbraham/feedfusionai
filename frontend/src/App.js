@@ -57,6 +57,8 @@ function App() {
             .catch((err) => {
                 console.error("Failed to refresh feeds", err);
                 setIsRefreshing(false);
+                setRefreshResult(0); // fallback: show 0 new items if refresh fails
+                setTimeout(() => setRefreshResult(null), 3000);
             });
     };
 

@@ -20,15 +20,19 @@ const FeedItemCard = ({ item, onMarkAsRead, onToggleStar, onReadMore }) => {
 
   return (
     <div className="feed-item-content">
-      <h5 className="card-title">
-        {item.title || "No Title Available"}
-        {!item.read && <span className="badge bg-primary ms-2">New</span>}
-      </h5>
+      <div className="d-flex align-items-center flex-wrap mb-2">
+        <h5 className="card-title mb-0">{item.title || "No Title Available"}</h5>
+        {!item.read && (
+          <span className="badge bg-primary ms-2 mt-1 mt-md-0">
+            New
+          </span>
+        )}
+      </div>
       <div className="card-text mb-2">{renderDescription(item.description)}</div>
       <p className="text-muted small mb-2">
         {new Date(item.publishedDate).toLocaleString()}
       </p>
-      <div className="d-flex justify-content-end">
+      <div className="d-flex justify-content-end gap-2 flex-wrap">
         <a
           href={item.link}
           target="_blank"

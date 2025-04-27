@@ -1,7 +1,9 @@
 // src/components/FeedDashboard.js
 import React, { useState, useEffect } from "react";
 import FeedForm from "./FeedForm";
-import {API_BASE} from "../config";
+import { API_BASE } from "../config";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 function FeedDashboard({ onSelectFeed, refreshTrigger, darkMode }) {
   const [feeds, setFeeds] = useState([]);
@@ -52,25 +54,31 @@ function FeedDashboard({ onSelectFeed, refreshTrigger, darkMode }) {
   };
 
   return (
-      <div className="dashboard">
-        <div className="feeds">
-          <h2>Your Feeds</h2>
+      <div className={`card h-100 shadow-sm ${darkMode ? "bg-dark text-light" : "bg-white text-dark"}`}>
+        <div className="card-body">
+          <h5 className="card-title">Your Feeds</h5>
 
           {showFeedForm && (
-              <div className="feed-form-modal">
-                <FeedForm
-                    feed={currentFeed}
-                    onSuccess={() => {
-                      fetchFeeds();
-                      setShowFeedForm(false);
-                    }}
-                    onCancel={handleCancelForm}
-                />
+              <FeedForm
+                  feed={currentFeed}
+                  onSuccess={() => {
+                    fetchFeeds();
+                    setShowFeedForm(false);
+                  }}
+                  onCancel={handleCancelForm}
+              />
+          )}
+
+          {feeds.length === 0 && !showFeedForm && (
+            <div className="d-flex justify-content-center my-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading feeds...</span>
               </div>
+            </div>
           )}
 
           {feeds.length === 0 ? (
-              <p>No feeds found.</p>
+              <div className="alert alert-info text-center">No feeds found. Add a new feed!</div>
           ) : (
               <div className="feed-card-container">
                 {feeds.map((feed) => (
@@ -91,16 +99,16 @@ function FeedDashboard({ onSelectFeed, refreshTrigger, darkMode }) {
                             />
                           )}
                           <div className="flex-grow-1">
-                            <h5 className="card-title mb-1">
-                              {feed.title}
+                            <div className="d-flex align-items-center flex-wrap mb-1">
+                              <h5 className="card-title mb-0">{feed.title}</h5>
                               {feed.unreadCount !== undefined && (
-                                <span className="text-danger ms-2">
+                                <span className="text-danger ms-2 mt-1 mt-md-0 small">
                                   ({feed.unreadCount} unread)
                                 </span>
                               )}
-                            </h5>
+                            </div>
                             {feed.description && (
-                              <p className="card-text small mb-1">
+                              <p className="card-text small mb-2">
                                 {feed.description}
                               </p>
                             )}
@@ -121,20 +129,20 @@ function FeedDashboard({ onSelectFeed, refreshTrigger, darkMode }) {
                               </div>
                             )}
                           </div>
-                          <div className="ms-auto text-end">
+                          <div className="d-flex align-items-center gap-2 ms-auto">
                             <button
-                              className="btn btn-sm btn-outline-primary me-1"
-                              onClick={(e) => handleEditFeed(feed, e)}
+                              className="btn btn-sm btn-light border"
                               title="Edit Feed"
+                              onClick={(e) => handleEditFeed(feed, e)}
                             >
-                              Edit
+                              <FontAwesomeIcon icon={faEdit} />
                             </button>
                             <button
-                              className="btn btn-sm btn-outline-danger"
-                              onClick={(e) => handleDeleteFeed(feed.id, e)}
+                              className="btn btn-sm btn-light border"
                               title="Delete Feed"
+                              onClick={(e) => handleDeleteFeed(feed.id, e)}
                             >
-                              Delete
+                              <FontAwesomeIcon icon={faTrash} />
                             </button>
                           </div>
                         </div>
