@@ -26,6 +26,9 @@ function App() {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [refreshResult, setRefreshResult] = useState(null);
 
+    // Sidebar open state
+    const [sidebarOpen, setSidebarOpen] = useState(true);
+
     // Open blank Add Feed form
     const handleAddFeed = () => {
         setEditingFeed(null);
@@ -117,6 +120,14 @@ function App() {
                     darkMode={darkMode}
                     isRefreshing={isRefreshing}
                 />
+                <div className="d-flex justify-content-start m-2">
+                  <button
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={() => setSidebarOpen((prev) => !prev)}
+                  >
+                    {sidebarOpen ? "Hide Feeds" : "Show Feeds"}
+                  </button>
+                </div>
 
                 {refreshResult !== null && (
                     <div className="alert alert-success text-center mx-3">
@@ -132,36 +143,31 @@ function App() {
                     />
                 )}
 
-                <div className="container-fluid">
-                    <div className="row">
-                        <div className="col-md-4 p-3">
-                            <div className={`card h-100 shadow-sm ${darkMode ? "bg-dark text-light" : "bg-white text-dark"}`}>
-                                <div className="card-body">
-                                    <FeedDashboard
-                                        onSelectFeed={setSelectedFeedId}
-                                        onEditFeed={handleEditFeed}
-                                        refreshTrigger={refreshTrigger}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-md-8 p-3">
-                            <div className={`card h-100 shadow-sm ${darkMode ? "bg-dark text-light" : "bg-white text-dark"}`}>
-                                <div className="card-body">
-                                    {selectedFeedId ? (
-                                        <FeedItemList
-                                            feedId={selectedFeedId}
-                                            onItemMarkedRead={() => setRefreshTrigger(prev => prev + 1)}
-                                        />
-                                    ) : (
-                                        <div className="placeholder">
-                                            <h2>Select a feed to see its items</h2>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+                <div className="d-flex" style={{ height: "calc(100vh - 64px)", overflow: "hidden" }}>
+                  {/* Sidebar */}
+                  {sidebarOpen && (
+                    <div className="sidebar bg-light border-end">
+                      <FeedDashboard
+                        onSelectFeed={setSelectedFeedId}
+                        onEditFeed={handleEditFeed}
+                        refreshTrigger={refreshTrigger}
+                      />
                     </div>
+                  )}
+
+                  {/* Main Content */}
+                  <div className="main-content p-3">
+                    {selectedFeedId ? (
+                      <FeedItemList
+                        feedId={selectedFeedId}
+                        onItemMarkedRead={() => setRefreshTrigger((prev) => prev + 1)}
+                      />
+                    ) : (
+                      <div className="placeholder">
+                        <h2>Select a feed to see its items</h2>
+                      </div>
+                    )}
+                  </div>
                 </div>
             </div>
         </Router>

@@ -9,12 +9,20 @@ function FeedDashboard({ onSelectFeed, refreshTrigger, darkMode }) {
   const [feeds, setFeeds] = useState([]);
   const [showFeedForm, setShowFeedForm] = useState(false);
   const [currentFeed, setCurrentFeed] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const fetchFeeds = () => {
+    setLoading(true);
     fetch(`${API_BASE}/feeds`)
         .then((res) => res.json())
-        .then(setFeeds)
-        .catch((err) => console.error("Failed to fetch feeds", err));
+        .then((data) => {
+          setFeeds(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch feeds", err);
+          setLoading(false);
+        });
   };
 
   useEffect(fetchFeeds, [refreshTrigger]);
@@ -54,8 +62,8 @@ function FeedDashboard({ onSelectFeed, refreshTrigger, darkMode }) {
   };
 
   return (
-      <div className={`card h-100 shadow-sm ${darkMode ? "bg-dark text-light" : "bg-white text-dark"}`}>
-        <div className="card-body">
+      <div className={darkMode ? "bg-dark text-light" : "bg-white text-dark"}>
+        <div className="card-body p-3">
           <h5 className="card-title">Your Feeds</h5>
 
           {showFeedForm && (
@@ -69,7 +77,7 @@ function FeedDashboard({ onSelectFeed, refreshTrigger, darkMode }) {
               />
           )}
 
-          {feeds.length === 0 && !showFeedForm && (
+          {loading && !showFeedForm && (
             <div className="d-flex justify-content-center my-5">
               <div className="spinner-border text-primary" role="status">
                 <span className="visually-hidden">Loading feeds...</span>
@@ -77,75 +85,62 @@ function FeedDashboard({ onSelectFeed, refreshTrigger, darkMode }) {
             </div>
           )}
 
-          {feeds.length === 0 ? (
-              <div className="alert alert-info text-center">No feeds found. Add a new feed!</div>
-          ) : (
-              <div className="feed-card-container">
+          {!loading && feeds.length === 0 && !showFeedForm && (
+            <div className="alert alert-info text-center">No feeds found. Add a new feed!</div>
+          )}
+
+          {!loading && feeds.length > 0 && (
+              <div className="vstack gap-1">
                 {feeds.map((feed) => (
                     <div
                       key={feed.id}
-                      className={`card mb-3 shadow-sm ${darkMode ? "bg-dark text-light" : "bg-white text-dark"}`}
+                      className={`card py-2 px-2 shadow-sm ${darkMode ? "bg-dark text-light" : ""}`}
                       onClick={() => onSelectFeed && onSelectFeed(feed.id)}
+                      style={{ cursor: "pointer" }}
                     >
-                      <div className={`card-body ${darkMode ? "bg-dark text-light" : ""}`}>
-                        <div className="d-flex align-items-center">
+                      <div className="d-flex align-items-center justify-content-between" style={{ minWidth: 0 }}>
+                        {/* Feed Icon and Unread Count on first line */}
+                        <div className="d-flex align-items-center flex-grow-1" style={{ minWidth: 0 }}>
                           {feed.imageUrl && (
                             <img
                               src={feed.imageUrl}
                               alt={feed.title}
-                              className="me-3"
-                              style={{ width: '48px', height: '48px', objectFit: 'cover' }}
+                              className="me-2 flex-shrink-0"
+                              style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '5px' }}
                               onClick={(e) => e.stopPropagation()}
                             />
                           )}
-                          <div className="flex-grow-1">
-                            <div className="d-flex align-items-center flex-wrap mb-1">
-                              <h5 className="card-title mb-0">{feed.title}</h5>
-                              {feed.unreadCount !== undefined && (
-                                <span className="text-danger ms-2 mt-1 mt-md-0 small">
-                                  ({feed.unreadCount} unread)
-                                </span>
-                              )}
-                            </div>
-                            {feed.description && (
-                              <p className="card-text small mb-2">
-                                {feed.description}
-                              </p>
-                            )}
-                            <small className="text-muted">
-                              Last Fetched: {feed.lastFetched ? new Date(feed.lastFetched).toLocaleString() : "N/A"}
-                            </small>
-                            {feed.link && (
-                              <div>
-                                <a
-                                  href={feed.link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="small d-block mt-1"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  Visit site →
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                          <div className="d-flex align-items-center gap-2 ms-auto">
-                            <button
-                              className="btn btn-sm btn-light border"
-                              title="Edit Feed"
-                              onClick={(e) => handleEditFeed(feed, e)}
-                            >
-                              <FontAwesomeIcon icon={faEdit} />
-                            </button>
-                            <button
-                              className="btn btn-sm btn-light border"
-                              title="Delete Feed"
-                              onClick={(e) => handleDeleteFeed(feed.id, e)}
-                            >
-                              <FontAwesomeIcon icon={faTrash} />
-                            </button>
-                          </div>
+                          {feed.unreadCount !== undefined && (
+                            <span className="text-danger small flex-shrink-0">
+                              ({feed.unreadCount} unread)
+                            </span>
+                          )}
                         </div>
+                      </div>
+
+                      {/* Second line: Feed Title */}
+                      <div className="mt-1">
+                        <h6 className="mb-0 text-truncate" style={{ maxWidth: "100%" }}>
+                          {feed.title}
+                        </h6>
+                      </div>
+
+                      {/* Third line: Edit/Delete Buttons */}
+                      <div className="d-flex justify-content-end mt-2 gap-2">
+                        <button
+                          className="btn sidebar-action-button btn-light border"
+                          title="Edit Feed"
+                          onClick={(e) => handleEditFeed(feed, e)}
+                        >
+                          <FontAwesomeIcon icon={faEdit} />
+                        </button>
+                        <button
+                          className="btn sidebar-action-button btn-light border"
+                          title="Delete Feed"
+                          onClick={(e) => handleDeleteFeed(feed.id, e)}
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </button>
                       </div>
                     </div>
                 ))}

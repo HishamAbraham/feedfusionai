@@ -142,7 +142,9 @@ function FeedItemList({ feedId, onItemMarkedRead, darkMode }) {
   return (
     <div className="feed-item-list">
       <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-        <h5 className="mb-0">Feed Items for {feedTitle || "Feed"}</h5>
+        <h5 className="mb-0 text-truncate" style={{ maxWidth: "300px" }}>
+          Feed Items for {feedTitle || "Feed"}
+        </h5>
         <div className="btn-group">
           <button className="btn btn-sm btn-outline-success" onClick={markAllAsRead}>
             Mark All As Read
@@ -156,7 +158,7 @@ function FeedItemList({ feedId, onItemMarkedRead, darkMode }) {
         </div>
       </div>
       {displayedItems.length === 0 ? (
-        <div className="alert alert-warning text-center">
+        <div className="alert alert-warning text-center small">
           No feed items to display. Please check your filters or add new feeds!
         </div>
       ) : (
@@ -164,16 +166,14 @@ function FeedItemList({ feedId, onItemMarkedRead, darkMode }) {
           {displayedItems.map((item) => (
             <div
               key={item.id}
-              className={`card mb-3 shadow-sm ${darkMode ? "bg-dark text-light" : "bg-white text-dark"}`}
+              className={`border-bottom ${darkMode ? "bg-dark text-light" : "bg-white text-dark"}`}
             >
-              <div className={`card-body p-3 ${darkMode ? "bg-dark text-light" : ""}`}>
-                <FeedItemCard
-                  item={item}
-                  onMarkAsRead={markItemAsRead}
-                  onToggleStar={toggleStar}
-                  onReadMore={openReadMore}
-                />
-              </div>
+              <FeedItemCard
+                item={item}
+                onMarkAsRead={markItemAsRead}
+                onToggleStar={toggleStar}
+                onReadMore={openReadMore}
+              />
             </div>
           ))}
         </div>

@@ -19,16 +19,20 @@ const FeedItemCard = ({ item, onMarkAsRead, onToggleStar, onReadMore }) => {
   };
 
   return (
-    <div className="feed-item-content">
+    <div className="feed-item-content p-2">
       <div className="d-flex align-items-center flex-wrap mb-2">
-        <h5 className="card-title mb-0">{item.title || "No Title Available"}</h5>
+        <h6 className="card-title mb-0 text-truncate" style={{ maxWidth: "75%" }}>
+          {item.title || "No Title Available"}
+        </h6>
         {!item.read && (
           <span className="badge bg-primary ms-2 mt-1 mt-md-0">
             New
           </span>
         )}
       </div>
-      <div className="card-text mb-2">{renderDescription(item.description)}</div>
+      <div className="card-text mb-2 feed-item-description">
+        {renderDescription(item.description)}
+      </div>
       <p className="text-muted small mb-2">
         {new Date(item.publishedDate).toLocaleString()}
       </p>
@@ -37,14 +41,14 @@ const FeedItemCard = ({ item, onMarkAsRead, onToggleStar, onReadMore }) => {
           href={item.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn btn-sm btn-outline-primary me-2"
+          className="btn feed-item-action-button btn-outline-primary me-1"
           title="Read More"
         >
           <FontAwesomeIcon icon={faBookOpen} />
         </a>
         {!item.read && (
           <button
-            className="btn btn-sm btn-outline-success me-2"
+            className="btn feed-item-action-button btn-outline-success me-1"
             title="Mark as Read"
             onClick={() => onMarkAsRead(item.id)}
           >
@@ -52,7 +56,7 @@ const FeedItemCard = ({ item, onMarkAsRead, onToggleStar, onReadMore }) => {
           </button>
         )}
         <button
-          className="btn btn-sm btn-outline-warning"
+          className="btn feed-item-action-button btn-outline-warning"
           title={item.starred ? "Unstar" : "Star"}
           onClick={() => onToggleStar(item.id)}
         >
