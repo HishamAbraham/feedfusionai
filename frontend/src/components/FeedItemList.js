@@ -1,10 +1,9 @@
 // src/components/FeedItemList.js
 import React, { useState, useEffect } from "react";
-import "../css/FeedItemList.css";
 import FeedItemCard from "./FeedItemCard";
 import {API_BASE} from "../config";
 
-function FeedItemList({ feedId, onItemMarkedRead }) {
+function FeedItemList({ feedId, onItemMarkedRead, darkMode }) {
   const [feedItems, setFeedItems] = useState([]);
   const [feedTitle, setFeedTitle] = useState("");
   const [loading, setLoading] = useState(true);
@@ -155,13 +154,19 @@ function FeedItemList({ feedId, onItemMarkedRead }) {
       ) : (
         <div className="feed-card-container">
           {displayedItems.map((item) => (
-            <FeedItemCard
+            <div
               key={item.id}
-              item={item}
-              onMarkAsRead={markItemAsRead}
-              onToggleStar={toggleStar}
-              onReadMore={openReadMore}
-            />
+              className={`card mb-3 shadow-sm ${darkMode ? "bg-dark text-light" : "bg-white text-dark"}`}
+            >
+              <div className={`card-body p-3 ${darkMode ? "bg-dark text-light" : ""}`}>
+                <FeedItemCard
+                  item={item}
+                  onMarkAsRead={markItemAsRead}
+                  onToggleStar={toggleStar}
+                  onReadMore={openReadMore}
+                />
+              </div>
+            </div>
           ))}
         </div>
       )}

@@ -1,10 +1,9 @@
 // src/components/FeedDashboard.js
 import React, { useState, useEffect } from "react";
 import FeedForm from "./FeedForm";
-import "../css/FeedDashboard.css";
 import {API_BASE} from "../config";
 
-function FeedDashboard({ onSelectFeed, refreshTrigger }) {
+function FeedDashboard({ onSelectFeed, refreshTrigger, darkMode }) {
   const [feeds, setFeeds] = useState([]);
   const [showFeedForm, setShowFeedForm] = useState(false);
   const [currentFeed, setCurrentFeed] = useState(null);
@@ -76,68 +75,69 @@ function FeedDashboard({ onSelectFeed, refreshTrigger }) {
               <div className="feed-card-container">
                 {feeds.map((feed) => (
                     <div
-                        key={feed.id}
-                        className="feed-card"
-                        onClick={() => onSelectFeed && onSelectFeed(feed.id)}
+                      key={feed.id}
+                      className={`card mb-3 shadow-sm ${darkMode ? "bg-dark text-light" : "bg-white text-dark"}`}
+                      onClick={() => onSelectFeed && onSelectFeed(feed.id)}
                     >
-                      <div className="feed-card-content">
-                        {feed.imageUrl && (
+                      <div className={`card-body ${darkMode ? "bg-dark text-light" : ""}`}>
+                        <div className="d-flex align-items-center">
+                          {feed.imageUrl && (
                             <img
-                                src={feed.imageUrl}
-                                alt={feed.title}
-                                className="feed-image"
-                                onClick={(e) => e.stopPropagation()}
+                              src={feed.imageUrl}
+                              alt={feed.title}
+                              className="me-3"
+                              style={{ width: '48px', height: '48px', objectFit: 'cover' }}
+                              onClick={(e) => e.stopPropagation()}
                             />
-                        )}
-                        <div className="feed-text">
-                          <h3 className="feed-title">
-                            {feed.title}
-                            {feed.unreadCount !== undefined && (
-                                <span className="unread-count">
-                          ({feed.unreadCount} unread)
-                        </span>
-                            )}
-                          </h3>
-                          {feed.description && (
-                              <p className="feed-description">
+                          )}
+                          <div className="flex-grow-1">
+                            <h5 className="card-title mb-1">
+                              {feed.title}
+                              {feed.unreadCount !== undefined && (
+                                <span className="text-danger ms-2">
+                                  ({feed.unreadCount} unread)
+                                </span>
+                              )}
+                            </h5>
+                            {feed.description && (
+                              <p className="card-text small mb-1">
                                 {feed.description}
                               </p>
-                          )}
-                          <p className="feed-fetched">
-                            Last Fetched:{" "}
-                            {feed.lastFetched
-                                ? new Date(feed.lastFetched).toLocaleString()
-                                : "N/A"}
-                          </p>
-                          {feed.link && (
-                              <a
+                            )}
+                            <small className="text-muted">
+                              Last Fetched: {feed.lastFetched ? new Date(feed.lastFetched).toLocaleString() : "N/A"}
+                            </small>
+                            {feed.link && (
+                              <div>
+                                <a
                                   href={feed.link}
-                                  className="feed-home-link"
                                   target="_blank"
                                   rel="noopener noreferrer"
+                                  className="small d-block mt-1"
                                   onClick={(e) => e.stopPropagation()}
-                              >
-                                Visit site →
-                              </a>
-                          )}
+                                >
+                                  Visit site →
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                          <div className="ms-auto text-end">
+                            <button
+                              className="btn btn-sm btn-outline-primary me-1"
+                              onClick={(e) => handleEditFeed(feed, e)}
+                              title="Edit Feed"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="btn btn-sm btn-outline-danger"
+                              onClick={(e) => handleDeleteFeed(feed.id, e)}
+                              title="Delete Feed"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
-                      </div>
-
-                      <div className="feed-card-actions">
-                        <button
-                            className="icon-button edit-btn"
-                            onClick={(e) => handleEditFeed(feed, e)}
-                            title="Edit Feed"
-                        >
-                          Edit
-                        </button>
-                        <button
-                            className="icon-button delete-btn"
-                            onClick={(e) => handleDeleteFeed(feed.id, e)}
-                            title="Delete Feed"
-                        >
-                          Delete
-                        </button>
                       </div>
                     </div>
                 ))}

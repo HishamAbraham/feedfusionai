@@ -7,6 +7,7 @@ import FeedItemList from "./components/FeedItemList";
 import FeedForm from "./components/FeedForm";
 import { API_BASE } from "./config";
 import "./css/App.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
     const [selectedFeedId, setSelectedFeedId] = useState(null);
@@ -59,9 +60,17 @@ function App() {
             });
     };
 
-    // Toggle light/dark CSS class
+    // Toggle light/dark CSS class on document.body
     const toggleDarkMode = () => {
-        setDarkMode((prev) => !prev);
+        setDarkMode((prev) => {
+            const newMode = !prev;
+            if (newMode) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+            return newMode;
+        });
     };
 
     // Handler passed to FeedForm for both add & edit
@@ -98,7 +107,7 @@ function App() {
 
     return (
         <Router>
-            <div className={`app-container ${darkMode ? "dark-mode" : ""}`}>
+            <div className={`app-container ${darkMode ? "bg-dark text-light" : "bg-light text-dark"}`}>
                 <Header
                     onAddFeed={handleAddFeed}
                     onRefreshFeeds={handleRefreshFeeds}
@@ -108,40 +117,48 @@ function App() {
                 />
 
                 {refreshResult !== null && (
-                    <div className="refresh-banner">
+                    <div className="alert alert-success text-center mx-3">
                         🚀 {refreshResult} new items added
                     </div>
                 )}
 
                 {showFeedForm && (
-                    <div className="modal-overlay">
-                        <FeedForm
-                            feed={editingFeed}
-                            onSuccess={handleFormSubmit}
-                            onCancel={handleCancelForm}
-                        />
-                    </div>
+                    <FeedForm
+                        feed={editingFeed}
+                        onSuccess={handleFormSubmit}
+                        onCancel={handleCancelForm}
+                    />
                 )}
 
-                <div className="panels">
-                    <div className="left-panel">
-                        <FeedDashboard
-                            onSelectFeed={setSelectedFeedId}
-                            onEditFeed={handleEditFeed}
-                            refreshTrigger={refreshTrigger}
-                        />
-                    </div>
-                    <div className="right-panel">
-                        {selectedFeedId ? (
-                            <FeedItemList
-                                feedId={selectedFeedId}
-                                onItemMarkedRead={() => setRefreshTrigger(prev => prev + 1)}
-                            />
-                        ) : (
-                            <div className="placeholder">
-                                <h2>Select a feed to see its items</h2>
+                <div className="container-fluid">
+                    <div className="row">
+                        <div className="col-md-4 p-3">
+                            <div className={`card h-100 shadow-sm ${darkMode ? "bg-dark text-light" : "bg-white text-dark"}`}>
+                                <div className="card-body">
+                                    <FeedDashboard
+                                        onSelectFeed={setSelectedFeedId}
+                                        onEditFeed={handleEditFeed}
+                                        refreshTrigger={refreshTrigger}
+                                    />
+                                </div>
                             </div>
-                        )}
+                        </div>
+                        <div className="col-md-8 p-3">
+                            <div className={`card h-100 shadow-sm ${darkMode ? "bg-dark text-light" : "bg-white text-dark"}`}>
+                                <div className="card-body">
+                                    {selectedFeedId ? (
+                                        <FeedItemList
+                                            feedId={selectedFeedId}
+                                            onItemMarkedRead={() => setRefreshTrigger(prev => prev + 1)}
+                                        />
+                                    ) : (
+                                        <div className="placeholder">
+                                            <h2>Select a feed to see its items</h2>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
