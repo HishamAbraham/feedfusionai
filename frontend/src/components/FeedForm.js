@@ -1,7 +1,6 @@
 // src/components/FeedForm.js
 import React, { useState, useEffect } from "react";
 import { API_BASE } from "../config";
-import "../css/FeedForm.css";
 
 const FeedForm = ({ feed, onSuccess, onCancel }) => {
   // Only store the URL in local state; title comes from the backend
@@ -45,45 +44,48 @@ const FeedForm = ({ feed, onSuccess, onCancel }) => {
   };
 
   return (
-      <div className="feed-form-container">
-        <h2>{feed ? "Edit Feed" : "Add New Feed"}</h2>
-
-        {error && <div className="form-error">{error}</div>}
-
-        <form onSubmit={handleSubmit} className="feed-form">
-          {feed && (
-              <div className="form-group">
-                <label>Title:</label>
-                <input type="text" value={feed.title} disabled />
-              </div>
-          )}
-
-          <div className="form-group">
-            <label htmlFor="feedUrl">URL:</label>
-            <input
-                id="feedUrl"
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="Enter feed URL"
-                required
-            />
+    <div className="modal fade show" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
+      <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">{feed ? "Edit Feed" : "Add New Feed"}</h5>
+            <button type="button" className="btn-close" onClick={onCancel}></button>
           </div>
+          <div className="modal-body">
+            {error && <div className="alert alert-danger">{error}</div>}
 
-          <div className="form-actions">
-            <button type="submit" className="btn btn-submit">
-              {feed ? "Update Feed" : "Add Feed"}
-            </button>
-            <button
-                type="button"
-                className="btn btn-cancel"
-                onClick={onCancel}
-            >
+            <form id="feed-form" onSubmit={handleSubmit}>
+              {feed && (
+                <div className="mb-3">
+                  <label className="form-label">Title:</label>
+                  <input type="text" className="form-control" value={feed.title} disabled />
+                </div>
+              )}
+              <div className="mb-3">
+                <label htmlFor="feedUrl" className="form-label">URL:</label>
+                <input
+                  id="feedUrl"
+                  type="url"
+                  className="form-control"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="Enter feed URL"
+                  required
+                />
+              </div>
+            </form>
+          </div>
+          <div className="modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={onCancel}>
               Cancel
             </button>
+            <button type="submit" form="feed-form" className="btn btn-primary">
+              {feed ? "Update Feed" : "Add Feed"}
+            </button>
           </div>
-        </form>
+        </div>
       </div>
+    </div>
   );
 };
 

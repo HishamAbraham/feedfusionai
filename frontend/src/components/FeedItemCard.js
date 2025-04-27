@@ -4,10 +4,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBookOpen, faCheck, faStar as solidStar } from "@fortawesome/free-solid-svg-icons";
 import { faStar as regularStar } from "@fortawesome/free-regular-svg-icons";
 import { sanitizeAndTransform } from "../utils/sanitizeHtml";
-import "../css/FeedItemCard.css";
 
 const FeedItemCard = ({ item, onMarkAsRead, onToggleStar, onReadMore }) => {
-  // Helper function to render sanitized description.
   const renderDescription = (description) => {
     if (typeof description === "string") {
       return sanitizeAndTransform(description);
@@ -21,27 +19,36 @@ const FeedItemCard = ({ item, onMarkAsRead, onToggleStar, onReadMore }) => {
   };
 
   return (
-    <div className="feed-item-card">
-      <h3>
-        {item.title || "No Title Available"}
-        {!item.read && <span className="unread-badge">New</span>}
-      </h3>
-      <div className="item-description">{renderDescription(item.description)}</div>
-      <p>
-        <small>{new Date(item.publishedDate).toLocaleString()}</small>
+    <div className="feed-item-content p-2">
+      <div className="d-flex align-items-center flex-wrap mb-2">
+        <h6 className="card-title mb-0 text-truncate" style={{ maxWidth: "75%" }}>
+          {item.title || "No Title Available"}
+        </h6>
+        {!item.read && (
+          <span className="badge bg-primary ms-2 mt-1 mt-md-0">
+            New
+          </span>
+        )}
+      </div>
+      <div className="card-text mb-2 feed-item-description">
+        {renderDescription(item.description)}
+      </div>
+      <p className="text-muted small mb-2">
+        {new Date(item.publishedDate).toLocaleString()}
       </p>
-      {/* Toolbar for actions */}
-      <div className="feed-item-toolbar">
-        <button
-          className="toolbar-button btn-read-more"
+      <div className="d-flex justify-content-end gap-2 flex-wrap">
+        <a
+          href={item.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn feed-item-action-button btn-outline-primary me-1"
           title="Read More"
-          onClick={() => onReadMore(item)}
         >
           <FontAwesomeIcon icon={faBookOpen} />
-        </button>
+        </a>
         {!item.read && (
           <button
-            className="toolbar-button btn-mark-read"
+            className="btn feed-item-action-button btn-outline-success me-1"
             title="Mark as Read"
             onClick={() => onMarkAsRead(item.id)}
           >
@@ -49,7 +56,7 @@ const FeedItemCard = ({ item, onMarkAsRead, onToggleStar, onReadMore }) => {
           </button>
         )}
         <button
-          className="toolbar-button btn-toggle-star"
+          className="btn feed-item-action-button btn-outline-warning"
           title={item.starred ? "Unstar" : "Star"}
           onClick={() => onToggleStar(item.id)}
         >
