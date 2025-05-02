@@ -5,6 +5,7 @@ import com.feedfusionai.model.Feed;
 import com.feedfusionai.model.FeedItem;
 import com.feedfusionai.repository.FeedRepository;
 import com.feedfusionai.repository.FeedItemRepository;
+import com.feedfusionai.service.AiService;
 import com.rometools.rome.feed.synd.*;
 import com.rometools.rome.io.*;
 import org.jsoup.Jsoup;
@@ -34,15 +35,18 @@ public class FeedScannerService {
     private static final Logger logger = LoggerFactory.getLogger(FeedScannerService.class);
 
     private final RestTemplate restTemplate;
+    private final AiService aiService;
 
     public FeedScannerService(
             FeedRepository feedRepository,
             FeedItemRepository feedItemRepository,
-            RestTemplate restTemplate    // ← add this
+            RestTemplate restTemplate,
+            AiService aiService
     ) {
         this.feedRepository     = feedRepository;
         this.feedItemRepository = feedItemRepository;
-        this.restTemplate       = restTemplate;    // ← assign here
+        this.restTemplate       = restTemplate;
+        this.aiService          = aiService;
     }
 
     public int scanFeeds() {
@@ -141,6 +145,14 @@ public class FeedScannerService {
                 );
                 if (entry.getDescription() != null) {
                     item.setDescription(entry.getDescription().getValue());
+                }
+                // AI summary generation
+                try {
+                    String textToSummarize = Jsoup.parse(item.getDescription() != null ? item.getDescription() : "").text();
+                    String summary = aiService.summarizeContent(textToSummarize).block();
+                    item.setSummary(summary);
+                } catch (Exception e) {
+                    logger.warn("Failed to summarize content for {}: {}", item.getFeedLink(), e.getMessage());
                 }
                 items.add(item);
             }

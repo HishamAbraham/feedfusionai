@@ -130,6 +130,27 @@ function FeedItemList({ feedId, onItemMarkedRead, darkMode }) {
     window.open(item.feedLink, "_blank", "noopener,noreferrer");
   };
 
+  const handleResummarize = (itemId) => {
+    return fetch(`${API_BASE}/feed-items/${itemId}/resummarize`, {
+      method: "PATCH",
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.text().then((text) => {
+            throw new Error(text);
+          });
+        }
+        return res.text();
+      })
+      .then((summary) => {
+        setFeedItems((prevItems) =>
+          prevItems.map((item) =>
+            item.id === itemId ? { ...item, summary } : item
+          )
+        );
+      });
+  };
+
   if (loading) return (
     <div className="d-flex justify-content-center my-5">
       <div className="spinner-border text-primary" role="status">
@@ -173,6 +194,7 @@ function FeedItemList({ feedId, onItemMarkedRead, darkMode }) {
                 onMarkAsRead={markItemAsRead}
                 onToggleStar={toggleStar}
                 onReadMore={openReadMore}
+                onResummarize={handleResummarize}
               />
             </div>
           ))}

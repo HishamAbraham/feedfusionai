@@ -6,7 +6,6 @@ import com.feedfusionai.repository.FeedItemRepository;
 import com.feedfusionai.repository.FeedRepository;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.SyndFeedInput;
-import com.rometools.rome.io.XmlReader;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +14,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import javax.xml.parsers.SAXParserFactory;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
+import org.jdom2.input.SAXBuilder;
 
 @Service
 public class FeedService {
@@ -42,8 +46,43 @@ public class FeedService {
 
     public Feed addFeed(Feed feed) {
         // 1) Fetch metadata from the URL
-        try (XmlReader reader = new XmlReader(new URL(feed.getUrl()))) {
-            SyndFeed syndFeed = new SyndFeedInput().build(reader);
+        try {
+            URL feedUrl = new URL(feed.getUrl());
+
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            // Allow DOCTYPE but block external entities
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+
+            XMLReader xmlReader = factory.newSAXParser().getXMLReader();
+            InputSource inputSource = new InputSource(feedUrl.openStream());
+
+            SAXBuilder saxBuilder = new SAXBuilder();
+            saxBuilder.setXMLReaderFactory(new org.jdom2.input.sax.XMLReaderJDOMFactory() {
+                @Override
+                public XMLReader createXMLReader() {
+                    return xmlReader;
+                }
+
+                @Override
+                public boolean isValidating() {
+                    return false;
+                }
+
+                public boolean isIgnoringElementContentWhitespace() {
+                    return false;
+                }
+
+                public boolean isExpandEntities() {
+                    return false;
+                }
+            });
+
+            SyndFeedInput input = new SyndFeedInput();
+            org.jdom2.Document document = saxBuilder.build(inputSource);
+            SyndFeed syndFeed = input.build(document);
 
             // 2) Populate your Feed entity
             feed.setTitle(syndFeed.getTitle());
