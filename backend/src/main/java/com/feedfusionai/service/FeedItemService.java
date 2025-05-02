@@ -1,9 +1,11 @@
 package com.feedfusionai.service;
-
 import com.feedfusionai.model.FeedItem;
 import com.feedfusionai.repository.FeedItemRepository;
+import com.feedfusionai.service.AiService;
+import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +15,9 @@ public class FeedItemService {
 
     @Autowired
     private FeedItemRepository feedItemRepository;
+
+    @Autowired
+    private AiService aiService;
 
     // Retrieve all feed items
     public List<FeedItem> getAllFeedItems() {
@@ -86,6 +91,22 @@ public class FeedItemService {
     // Delete a feed item by its ID
     public void deleteFeedItem(String id) {
         feedItemRepository.deleteById(id);
+    }
+
+    public Mono<String> resummarizeFeedItem(String id) {
+        return Mono.fromCallable(() -> feedItemRepository.findById(id))
+                .flatMap(optionalItem -> optionalItem.map(Mono::just).orElseGet(Mono::empty))
+                .flatMap(item -> {
+                    String content = Jsoup.parse(
+                            item.getDescription() != null ? item.getDescription() : ""
+                    ).text();
+                    return aiService.summarizeContent(content)
+                            .flatMap(summary -> {
+                                item.setSummary(summary);
+                                return Mono.fromCallable(() -> feedItemRepository.save(item))
+                                        .thenReturn(summary);
+                            });
+                });
     }
 
 

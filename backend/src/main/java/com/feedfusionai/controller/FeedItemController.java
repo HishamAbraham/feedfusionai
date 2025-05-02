@@ -82,4 +82,12 @@ public class FeedItemController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @PatchMapping("/{id}/resummarize")
+    public reactor.core.publisher.Mono<ResponseEntity<String>> resummarizeFeedItem(@PathVariable String id) {
+        logger.debug("Resummarizing feed item {}", id);
+        return feedItemService.resummarizeFeedItem(id)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 }

@@ -23,4 +23,5 @@ public class FeedItem {
     private String description;
     private Boolean read;
     private boolean starred;
+    private String summary;
 }
