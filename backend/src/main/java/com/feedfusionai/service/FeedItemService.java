@@ -1,7 +1,6 @@
 package com.feedfusionai.service;
 import com.feedfusionai.model.FeedItem;
 import com.feedfusionai.repository.FeedItemRepository;
-import com.feedfusionai.service.AiService;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -97,7 +96,7 @@ public class FeedItemService {
         return Mono.fromCallable(() -> feedItemRepository.findById(id))
                 .flatMap(optionalItem -> optionalItem.map(Mono::just).orElseGet(Mono::empty))
                 .flatMap(item -> {
-                    String content = Jsoup.parse(
+                    final String content = Jsoup.parse(
                             item.getDescription() != null ? item.getDescription() : ""
                     ).text();
                     return aiService.summarizeContent(content)

@@ -1,7 +1,6 @@
 package com.feedfusionai.service;
 
 import com.feedfusionai.model.Feed;
-import com.feedfusionai.model.FeedItem;
 import com.feedfusionai.repository.FeedItemRepository;
 import com.feedfusionai.repository.FeedRepository;
 import com.rometools.rome.feed.synd.SyndFeed;
@@ -31,7 +30,7 @@ public class FeedService {
 
 
     public List<Feed> getAllFeeds() {
-        List<Feed> feeds = feedRepository.findAll();
+        final List<Feed> feeds = feedRepository.findAll();
         for (Feed feed : feeds) {
             feed.setUnreadCount(feedItemRepository.countByFeedIdAndReadFalse(feed.getId()));
         }
@@ -39,7 +38,7 @@ public class FeedService {
     }
 
     public Optional<Feed> getFeedById(String id) {
-        Optional<Feed> feed = feedRepository.findById(id);
+        final Optional<Feed> feed = feedRepository.findById(id);
         feed.ifPresent(value -> value.setUnreadCount(feedItemRepository.countByFeedIdAndReadFalse(value.getId())));
         return feed;
     }
@@ -47,19 +46,19 @@ public class FeedService {
     public Feed addFeed(Feed feed) {
         // 1) Fetch metadata from the URL
         try {
-            URL feedUrl = new URL(feed.getUrl());
+            final URL feedUrl = new URL(feed.getUrl());
 
-            SAXParserFactory factory = SAXParserFactory.newInstance();
+            final SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setNamespaceAware(true);
             // Allow DOCTYPE but block external entities
             factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
             factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
             factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
 
-            XMLReader xmlReader = factory.newSAXParser().getXMLReader();
-            InputSource inputSource = new InputSource(feedUrl.openStream());
+            final XMLReader xmlReader = factory.newSAXParser().getXMLReader();
+            final InputSource inputSource = new InputSource(feedUrl.openStream());
 
-            SAXBuilder saxBuilder = new SAXBuilder();
+            final SAXBuilder saxBuilder = new SAXBuilder();
             saxBuilder.setXMLReaderFactory(new org.jdom2.input.sax.XMLReaderJDOMFactory() {
                 @Override
                 public XMLReader createXMLReader() {
@@ -80,9 +79,9 @@ public class FeedService {
                 }
             });
 
-            SyndFeedInput input = new SyndFeedInput();
-            org.jdom2.Document document = saxBuilder.build(inputSource);
-            SyndFeed syndFeed = input.build(document);
+            final SyndFeedInput input = new SyndFeedInput();
+            final org.jdom2.Document document = saxBuilder.build(inputSource);
+            final SyndFeed syndFeed = input.build(document);
 
             // 2) Populate your Feed entity
             feed.setTitle(syndFeed.getTitle());
@@ -105,9 +104,9 @@ public class FeedService {
 
     // Method to update specific fields using PATCH
     public Optional<Feed> patchFeed(String id, Map<String, Object> updates) {
-        Optional<Feed> optionalFeed = feedRepository.findById(id);
+        final Optional<Feed> optionalFeed = feedRepository.findById(id);
         if (optionalFeed.isPresent()) {
-            Feed feed = optionalFeed.get();
+            final Feed feed = optionalFeed.get();
 
             if (updates.containsKey("title")) {
                 feed.setTitle((String) updates.get("title"));

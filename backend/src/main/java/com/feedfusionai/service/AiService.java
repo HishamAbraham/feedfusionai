@@ -2,10 +2,8 @@ package com.feedfusionai.service;
 
 import com.feedfusionai.ai.AiClient;
 import com.feedfusionai.ai.AiClientFactory;
-import com.feedfusionai.model.FeedItem;
 import com.feedfusionai.repository.FeedItemRepository;
 import lombok.RequiredArgsConstructor;
-import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -16,12 +14,12 @@ public class AiService {
     private final FeedItemRepository feedItemRepository;
 
     public Mono<String> summarizeContent(String content) {
-        AiClient client = aiClientFactory.getClient("openai");
+        final AiClient client = aiClientFactory.getClient("openai");
         return client.summarize(content);
     }
 
     public Mono<String> generateTags(String content) {
-        AiClient client = aiClientFactory.getClient("openai");
+        final AiClient client = aiClientFactory.getClient("openai");
         return client.generateTags(content);
     }
 }

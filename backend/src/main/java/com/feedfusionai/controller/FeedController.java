@@ -41,7 +41,7 @@ public class FeedController {
 
     @PostMapping
     public ResponseEntity<Feed> createFeed(@RequestBody Feed feed) {
-        Feed created = feedService.addFeed(feed);
+        final Feed created = feedService.addFeed(feed);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
@@ -62,7 +62,7 @@ public class FeedController {
 
     @PatchMapping("/refresh")
     public ResponseEntity<Integer> refreshFeeds() {
-        int added = feedScannerService.scanFeeds();
+        final int added = feedScannerService.scanFeeds();
         return ResponseEntity.ok(added);
     }
 }
