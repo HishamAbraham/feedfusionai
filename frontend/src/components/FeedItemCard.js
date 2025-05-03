@@ -3,9 +3,10 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBookOpen, faCheck, faStar as solidStar, faRotateRight } from "@fortawesome/free-solid-svg-icons";
 import { faStar as regularStar } from "@fortawesome/free-regular-svg-icons";
+
 import { sanitizeAndTransform } from "../utils/sanitizeHtml";
 
-const FeedItemCard = ({ item, onMarkAsRead, onToggleStar, onReadMore, onResummarize }) => {
+const FeedItemCard = ({ item, onMarkAsRead, onToggleStar, onResummarize }) => {
   const renderDescription = (description) => {
     if (typeof description === "string") {
       return sanitizeAndTransform(description);

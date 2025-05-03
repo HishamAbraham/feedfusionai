@@ -1,9 +1,10 @@
 // src/components/FeedDashboard.js
 import React, { useState, useEffect } from "react";
-import FeedForm from "./FeedForm";
-import { API_BASE } from "../config";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+
+import FeedForm from "./FeedForm";
+import { API_BASE } from "../config";
 
 function FeedDashboard({ onSelectFeed, refreshTrigger, darkMode }) {
   const [feeds, setFeeds] = useState([]);
@@ -31,25 +32,6 @@ function FeedDashboard({ onSelectFeed, refreshTrigger, darkMode }) {
     e.stopPropagation();
     setCurrentFeed(feed);
     setShowFeedForm(true);
-  };
-
-  const handleFormSubmit = (feedData) => {
-    const method = currentFeed ? "PATCH" : "POST";
-    const url = currentFeed
-        ? `${API_BASE}/feeds/${currentFeed.id}`
-        : `${API_BASE}api/feeds`;
-
-    fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(feedData),
-    })
-        .then((res) => res.json())
-        .then(() => {
-          setShowFeedForm(false);
-          fetchFeeds();
-        })
-        .catch((err) => console.error("Failed to save feed", err));
   };
 
   const handleCancelForm = () => setShowFeedForm(false);
