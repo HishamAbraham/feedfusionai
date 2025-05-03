@@ -30,7 +30,7 @@ public class OpenAiClient implements AiClient {
 
     @Override
     public Mono<String> summarize(String content) {
-        Map<String, Object> requestBody = Map.of(
+        final Map<String, Object> requestBody = Map.of(
                 "model", "gpt-3.5-turbo",
                 "messages", new Object[] {
                         Map.of("role", "system", "content", "You summarize articles."),
@@ -43,10 +43,10 @@ public class OpenAiClient implements AiClient {
                 .retrieve()
                 .bodyToMono(Map.class)
                 .map(response -> {
-                    var choices = (java.util.List<?>) response.get("choices");
+                    final var choices = (java.util.List<?>) response.get("choices");
                     if (choices != null && !choices.isEmpty()) {
-                        var choice = (Map<?, ?>) choices.get(0);
-                        var message = (Map<?, ?>) choice.get("message");
+                        final var choice = (Map<?, ?>) choices.get(0);
+                        final var message = (Map<?, ?>) choice.get("message");
                         return (String) message.get("content");
                     }
                     return null;

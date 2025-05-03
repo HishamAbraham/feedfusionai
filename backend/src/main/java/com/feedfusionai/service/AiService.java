@@ -2,26 +2,29 @@ package com.feedfusionai.service;
 
 import com.feedfusionai.ai.AiClient;
 import com.feedfusionai.ai.AiClientFactory;
-import com.feedfusionai.model.FeedItem;
 import com.feedfusionai.repository.FeedItemRepository;
-import lombok.RequiredArgsConstructor;
-import org.jsoup.Jsoup;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 @Service
-@RequiredArgsConstructor
 public class AiService {
     private final AiClientFactory aiClientFactory;
+    @SuppressFBWarnings({"EI_EXPOSE_REP2", "URF_UNREAD_FIELD"})
     private final FeedItemRepository feedItemRepository;
 
+    public AiService(AiClientFactory aiClientFactory, FeedItemRepository feedItemRepository) {
+        this.aiClientFactory = aiClientFactory;
+        this.feedItemRepository = feedItemRepository;
+    }
+
     public Mono<String> summarizeContent(String content) {
-        AiClient client = aiClientFactory.getClient("openai");
+        final AiClient client = aiClientFactory.getClient("openai");
         return client.summarize(content);
     }
 
     public Mono<String> generateTags(String content) {
-        AiClient client = aiClientFactory.getClient("openai");
+        final AiClient client = aiClientFactory.getClient("openai");
         return client.generateTags(content);
     }
 }

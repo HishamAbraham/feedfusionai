@@ -5,7 +5,6 @@ import com.feedfusionai.model.Feed;
 import com.feedfusionai.model.FeedItem;
 import com.feedfusionai.repository.FeedRepository;
 import com.feedfusionai.repository.FeedItemRepository;
-import com.feedfusionai.service.AiService;
 import com.rometools.rome.feed.synd.*;
 import com.rometools.rome.io.*;
 import org.jsoup.Jsoup;
@@ -17,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,15 +25,19 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 @Service
 public class FeedScannerService {
 
     private final FeedRepository feedRepository;
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     private final FeedItemRepository feedItemRepository;
 
-    private static final Logger logger = LoggerFactory.getLogger(FeedScannerService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeedScannerService.class);
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     private final RestTemplate restTemplate;
     private final AiService aiService;
 
@@ -43,27 +47,27 @@ public class FeedScannerService {
             RestTemplate restTemplate,
             AiService aiService
     ) {
-        this.feedRepository     = feedRepository;
-        this.feedItemRepository = feedItemRepository;
-        this.restTemplate       = restTemplate;
-        this.aiService          = aiService;
+        this.feedRepository     = Objects.requireNonNull(feedRepository);
+        this.feedItemRepository = Objects.requireNonNull(feedItemRepository);
+        this.restTemplate       = Objects.requireNonNull(restTemplate);
+        this.aiService          = Objects.requireNonNull(aiService);
     }
 
     public int scanFeeds() {
         int newCount = 0;
-        List<Feed> feeds = feedRepository.findAll();
+        final List<Feed> feeds = feedRepository.findAll();
         for (Feed f : feeds) {
             try {
                 // 1) Fetch raw content + inspect headers
-                ResponseEntity<String> resp = restTemplate.getForEntity(f.getUrl(), String.class);
+                final ResponseEntity<String> resp = restTemplate.getForEntity(f.getUrl(), String.class);
                 String raw = resp.getBody();
                 if (raw == null) {
                     throw new IllegalStateException("Empty response from " + f.getUrl());
                 }
 
-                MediaType ct = resp.getHeaders().getContentType();
-                boolean isHtmlType = ct != null && ct.includes(MediaType.TEXT_HTML);
-                boolean isXmlType = ct != null && (
+                final MediaType ct = resp.getHeaders().getContentType();
+                final boolean isHtmlType = ct != null && ct.includes(MediaType.TEXT_HTML);
+                final boolean isXmlType = ct != null && (
                         ct.includes(MediaType.APPLICATION_XML) ||
                                 ct.includes(MediaType.APPLICATION_ATOM_XML) ||
                                 ct.includes(MediaType.valueOf("application/rss+xml")) ||
@@ -72,10 +76,10 @@ public class FeedScannerService {
 
                 // 2) If it really is HTML (by header or content) and not already XML, discover true feed URL
                 if ((isHtmlType || looksLikeHtml(raw)) && !isXmlType) {
-                    String discovered = discoverFeedUrl(f.getUrl());
-                    logger.info("Discovered feed URL for {} → {}", f.getUrl(), discovered);
+                    final String discovered = discoverFeedUrl(f.getUrl());
+                    LOGGER.info("Discovered feed URL for {} → {}", f.getUrl(), discovered);
 
-                    ResponseEntity<String> rssResp = restTemplate.getForEntity(discovered, String.class);
+                    final ResponseEntity<String> rssResp = restTemplate.getForEntity(discovered, String.class);
                     raw = rssResp.getBody();
                     if (raw == null) {
                         throw new IllegalStateException("Empty RSS response from " + discovered);
@@ -83,7 +87,7 @@ public class FeedScannerService {
                 }
 
                 // 3) Parse entries (with DOCTYPE‑stripping fallback)
-                List<FeedItem> items = parseFeedContent(raw);
+                final List<FeedItem> items = parseFeedContent(raw);
 
                 // 4) Dedupe & save new items
 
@@ -100,10 +104,10 @@ public class FeedScannerService {
                 f.setLastFetched(Instant.now());
                 feedRepository.save(f);
 
-                logger.info("Scanned feed {}: added {} new items", f.getUrl(), newCount);
+                LOGGER.info("Scanned feed {}: added {} new items", f.getUrl(), newCount);
             }
-            catch (Exception ex) {
-                logger.error("Error scanning feed {}: {}", f.getUrl(), ex.getMessage());
+            catch (IOException ex) {
+                LOGGER.error("Error scanning feed {}: {}", f.getUrl(), ex.getMessage());
             }
         }
         return newCount;
@@ -111,71 +115,76 @@ public class FeedScannerService {
 
     /** Heuristic: does this string look like an HTML page? */
     private boolean looksLikeHtml(String s) {
-        String t = s.trim().toLowerCase();
+        final String t = s.trim().toLowerCase(Locale.ROOT);
         return t.startsWith("<!doctype html") || t.startsWith("<html");
     }
 
     /** Parses RSS/Atom XML, stripping <!DOCTYPE> on parse errors. */
     private List<FeedItem> parseFeedContent(String xmlContent) {
-        List<FeedItem> items = new ArrayList<>();
+        final List<FeedItem> items = new ArrayList<>();
         try {
-            SyndFeedInput input = new SyndFeedInput();
+            final SyndFeedInput input = new SyndFeedInput();
             SyndFeed feed;
             try {
                 feed = input.build(new XmlReader(
                         new ByteArrayInputStream(xmlContent.getBytes(StandardCharsets.UTF_8))
                 ));
             } catch (Exception ex) {
-                String msg = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+                final String msg = ex.getMessage() != null ? ex.getMessage().toLowerCase(Locale.ROOT) : "";
                 if (msg.contains("disallow-doctype-decl") || msg.contains("doctype")) {
-                    String cleaned = xmlContent.replaceAll("(?i)<!DOCTYPE[^>]*>", "");
+                    final String cleaned = xmlContent.replaceAll("(?i)<!DOCTYPE[^>]*>", "");
                     feed = input.build(new StringReader(cleaned));
                 } else {
                     throw ex;
                 }
             }
             for (SyndEntry entry : feed.getEntries()) {
-                FeedItem item = new FeedItem();
-                item.setTitle(entry.getTitle());
-                item.setFeedLink(entry.getLink());
-                item.setPublishedDate(
-                        entry.getPublishedDate() != null
-                                ? entry.getPublishedDate().toInstant()
-                                : Instant.now()
-                );
-                if (entry.getDescription() != null) {
-                    item.setDescription(entry.getDescription().getValue());
-                }
-                // AI summary generation
-                try {
-                    String textToSummarize = Jsoup.parse(item.getDescription() != null ? item.getDescription() : "").text();
-                    String summary = aiService.summarizeContent(textToSummarize).block();
-                    item.setSummary(summary);
-                } catch (Exception e) {
-                    logger.warn("Failed to summarize content for {}: {}", item.getFeedLink(), e.getMessage());
-                }
+                final FeedItem item = createFeedItemFromEntry(entry);
                 items.add(item);
             }
         }
         catch (Exception e) {
-            logger.error("Error parsing feed content: {}", e.getMessage());
+            LOGGER.error("Error parsing feed content: {}", e.getMessage());
         }
         return items;
+    }
+
+    private FeedItem createFeedItemFromEntry(SyndEntry entry) {
+        final FeedItem item = new FeedItem();
+        item.setTitle(entry.getTitle());
+        item.setFeedLink(entry.getLink());
+        item.setPublishedDate(
+                entry.getPublishedDate() != null
+                        ? entry.getPublishedDate().toInstant()
+                        : Instant.now()
+        );
+        if (entry.getDescription() != null) {
+            item.setDescription(entry.getDescription().getValue());
+        }
+        try {
+            final String textToSummarize =
+                    Jsoup.parse(item.getDescription() != null ? item.getDescription() : "").text();
+            final String summary = aiService.summarizeContent(textToSummarize).block();
+            item.setSummary(summary);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to summarize content for {}: {}", item.getFeedLink(), e.getMessage());
+        }
+        return item;
     }
 
     /**
      * Use jsoup to pull <link type="application/rss+xml" ...> or atom link.
      */
     private String discoverFeedUrl(String pageUrl) throws IOException {
-        Document doc = Jsoup.connect(pageUrl)
+        final Document doc = Jsoup.connect(pageUrl)
                 .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
                 .referrer("https://www.google.com")
                 .timeout(10_000)
                 .get();
 
-        Elements links = doc.select("link[type=application/rss+xml], link[type=application/atom+xml]");
+        final Elements links = doc.select("link[type=application/rss+xml], link[type=application/atom+xml]");
         if (!links.isEmpty()) {
-            return links.first().absUrl("href");
+            return Objects.requireNonNull(links.first()).absUrl("href");
         }
         throw new IllegalStateException("No RSS/Atom feed link found at " + pageUrl);
     }

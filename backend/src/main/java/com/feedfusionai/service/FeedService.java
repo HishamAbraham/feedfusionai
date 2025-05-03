@@ -1,10 +1,10 @@
 package com.feedfusionai.service;
 
 import com.feedfusionai.model.Feed;
-import com.feedfusionai.model.FeedItem;
 import com.feedfusionai.repository.FeedItemRepository;
 import com.feedfusionai.repository.FeedRepository;
 import com.rometools.rome.feed.synd.SyndFeed;
+import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
@@ -16,9 +16,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
+import org.xml.sax.SAXException;
 import org.jdom2.input.SAXBuilder;
+import org.jdom2.JDOMException;
+import java.io.IOException;
 
 @Service
 public class FeedService {
@@ -31,7 +35,7 @@ public class FeedService {
 
 
     public List<Feed> getAllFeeds() {
-        List<Feed> feeds = feedRepository.findAll();
+        final List<Feed> feeds = feedRepository.findAll();
         for (Feed feed : feeds) {
             feed.setUnreadCount(feedItemRepository.countByFeedIdAndReadFalse(feed.getId()));
         }
@@ -39,7 +43,7 @@ public class FeedService {
     }
 
     public Optional<Feed> getFeedById(String id) {
-        Optional<Feed> feed = feedRepository.findById(id);
+        final Optional<Feed> feed = feedRepository.findById(id);
         feed.ifPresent(value -> value.setUnreadCount(feedItemRepository.countByFeedIdAndReadFalse(value.getId())));
         return feed;
     }
@@ -47,42 +51,24 @@ public class FeedService {
     public Feed addFeed(Feed feed) {
         // 1) Fetch metadata from the URL
         try {
-            URL feedUrl = new URL(feed.getUrl());
+            final URL feedUrl = new URL(feed.getUrl());
 
-            SAXParserFactory factory = SAXParserFactory.newInstance();
+            final SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setNamespaceAware(true);
             // Allow DOCTYPE but block external entities
             factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
             factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
             factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
 
-            XMLReader xmlReader = factory.newSAXParser().getXMLReader();
-            InputSource inputSource = new InputSource(feedUrl.openStream());
+            final XMLReader xmlReader = factory.newSAXParser().getXMLReader();
+            final InputSource inputSource = new InputSource(feedUrl.openStream());
 
-            SAXBuilder saxBuilder = new SAXBuilder();
-            saxBuilder.setXMLReaderFactory(new org.jdom2.input.sax.XMLReaderJDOMFactory() {
-                @Override
-                public XMLReader createXMLReader() {
-                    return xmlReader;
-                }
+            final SAXBuilder saxBuilder = new SAXBuilder();
+            saxBuilder.setXMLReaderFactory(new NonValidatingXmlReaderFactory(xmlReader));
 
-                @Override
-                public boolean isValidating() {
-                    return false;
-                }
-
-                public boolean isIgnoringElementContentWhitespace() {
-                    return false;
-                }
-
-                public boolean isExpandEntities() {
-                    return false;
-                }
-            });
-
-            SyndFeedInput input = new SyndFeedInput();
-            org.jdom2.Document document = saxBuilder.build(inputSource);
-            SyndFeed syndFeed = input.build(document);
+            final SyndFeedInput input = new SyndFeedInput();
+            final org.jdom2.Document document = saxBuilder.build(inputSource);
+            final SyndFeed syndFeed = input.build(document);
 
             // 2) Populate your Feed entity
             feed.setTitle(syndFeed.getTitle());
@@ -95,7 +81,7 @@ public class FeedService {
 
             feed.setLastFetched(Instant.now());
             feed.setUnreadCount(0);
-        } catch (Exception e) {
+        } catch (IOException | JDOMException | ParserConfigurationException | SAXException | FeedException e) {
             throw new RuntimeException("Failed to retrieve feed metadata from " + feed.getUrl(), e);
         }
 
@@ -105,9 +91,10 @@ public class FeedService {
 
     // Method to update specific fields using PATCH
     public Optional<Feed> patchFeed(String id, Map<String, Object> updates) {
-        Optional<Feed> optionalFeed = feedRepository.findById(id);
+        final Optional<Feed> optionalFeed = feedRepository.findById(id);
+        Optional<Feed> result = Optional.empty();
         if (optionalFeed.isPresent()) {
-            Feed feed = optionalFeed.get();
+            final Feed feed = optionalFeed.get();
 
             if (updates.containsKey("title")) {
                 feed.setTitle((String) updates.get("title"));
@@ -120,19 +107,33 @@ public class FeedService {
                 feed.setLastFetched(Instant.parse((String) updates.get("lastFetched")));
             }
 
-            // Add additional fields as needed
-
-            return Optional.of(feedRepository.save(feed));
+            result = Optional.of(feedRepository.save(feed));
         }
-        return Optional.empty();
+        return result;
     }
 
     public void deleteFeed(String id) {
         // 1) remove all items for that feed
         feedItemRepository.deleteByFeedId(id);
-//	"url": "https://www.theguardian.com/uk/rss",
         // 2) then delete the feed itself
         feedRepository.deleteById(id);
     }
 
+    private static class NonValidatingXmlReaderFactory implements org.jdom2.input.sax.XMLReaderJDOMFactory {
+        private final XMLReader xmlReader;
+
+        public NonValidatingXmlReaderFactory(XMLReader xmlReader) {
+            this.xmlReader = xmlReader;
+        }
+
+        @Override
+        public XMLReader createXMLReader() {
+            return xmlReader;
+        }
+
+        @Override
+        public boolean isValidating() {
+            return false;
+        }
+    }
 }
