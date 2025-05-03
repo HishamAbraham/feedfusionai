@@ -19,7 +19,9 @@ body {
   background-color: var(--background-color);
   color: var(--primary-text-color);
   font-family: Arial, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
   min-height: 100vh;
   padding-bottom: 20px;
 }
@@ -80,7 +82,9 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 /* Hover effect for action buttons */
