@@ -6,8 +6,17 @@
         Basic PMD rule set for FeedFusionAI backend. Covers best practices, code style, error-prone patterns, and performance.
     </description>
 
-    <rule ref="category/java/bestpractices.xml"/>
-    <rule ref="category/java/codestyle.xml"/>
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="GuardLogStatement"/>
+    </rule>
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <exclude name="LongVariable"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="ShortClassName"/>
+    </rule>
     <rule ref="category/java/errorprone.xml"/>
     <rule ref="category/java/performance.xml"/>
 </ruleset>

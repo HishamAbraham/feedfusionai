@@ -5,7 +5,6 @@ import com.feedfusionai.model.Feed;
 import com.feedfusionai.model.FeedItem;
 import com.feedfusionai.repository.FeedRepository;
 import com.feedfusionai.repository.FeedItemRepository;
-import com.feedfusionai.service.AiService;
 import com.rometools.rome.feed.synd.*;
 import com.rometools.rome.io.*;
 import org.jsoup.Jsoup;
@@ -25,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 @Service
@@ -33,7 +33,7 @@ public class FeedScannerService {
     private final FeedRepository feedRepository;
     private final FeedItemRepository feedItemRepository;
 
-    private static final Logger logger = LoggerFactory.getLogger(FeedScannerService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeedScannerService.class);
 
     private final RestTemplate restTemplate;
     private final AiService aiService;
@@ -74,7 +74,7 @@ public class FeedScannerService {
                 // 2) If it really is HTML (by header or content) and not already XML, discover true feed URL
                 if ((isHtmlType || looksLikeHtml(raw)) && !isXmlType) {
                     final String discovered = discoverFeedUrl(f.getUrl());
-                    logger.info("Discovered feed URL for {} → {}", f.getUrl(), discovered);
+                    LOGGER.info("Discovered feed URL for {} → {}", f.getUrl(), discovered);
 
                     final ResponseEntity<String> rssResp = restTemplate.getForEntity(discovered, String.class);
                     raw = rssResp.getBody();
@@ -101,10 +101,10 @@ public class FeedScannerService {
                 f.setLastFetched(Instant.now());
                 feedRepository.save(f);
 
-                logger.info("Scanned feed {}: added {} new items", f.getUrl(), newCount);
+                LOGGER.info("Scanned feed {}: added {} new items", f.getUrl(), newCount);
             }
             catch (Exception ex) {
-                logger.error("Error scanning feed {}: {}", f.getUrl(), ex.getMessage());
+                LOGGER.error("Error scanning feed {}: {}", f.getUrl(), ex.getMessage());
             }
         }
         return newCount;
@@ -112,7 +112,7 @@ public class FeedScannerService {
 
     /** Heuristic: does this string look like an HTML page? */
     private boolean looksLikeHtml(String s) {
-        final String t = s.trim().toLowerCase();
+        final String t = s.trim().toLowerCase(Locale.ROOT);
         return t.startsWith("<!doctype html") || t.startsWith("<html");
     }
 
@@ -127,7 +127,7 @@ public class FeedScannerService {
                         new ByteArrayInputStream(xmlContent.getBytes(StandardCharsets.UTF_8))
                 ));
             } catch (Exception ex) {
-                final String msg = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+                final String msg = ex.getMessage() != null ? ex.getMessage().toLowerCase(Locale.ROOT) : "";
                 if (msg.contains("disallow-doctype-decl") || msg.contains("doctype")) {
                     final String cleaned = xmlContent.replaceAll("(?i)<!DOCTYPE[^>]*>", "");
                     feed = input.build(new StringReader(cleaned));
@@ -136,33 +136,37 @@ public class FeedScannerService {
                 }
             }
             for (SyndEntry entry : feed.getEntries()) {
-                final FeedItem item = new FeedItem();
-                item.setTitle(entry.getTitle());
-                item.setFeedLink(entry.getLink());
-                item.setPublishedDate(
-                        entry.getPublishedDate() != null
-                                ? entry.getPublishedDate().toInstant()
-                                : Instant.now()
-                );
-                if (entry.getDescription() != null) {
-                    item.setDescription(entry.getDescription().getValue());
-                }
-                // AI summary generation
-                try {
-                    final String textToSummarize =
-                            Jsoup.parse(item.getDescription() != null ? item.getDescription() : "").text();
-                    final String summary = aiService.summarizeContent(textToSummarize).block();
-                    item.setSummary(summary);
-                } catch (Exception e) {
-                    logger.warn("Failed to summarize content for {}: {}", item.getFeedLink(), e.getMessage());
-                }
+                FeedItem item = createFeedItemFromEntry(entry);
                 items.add(item);
             }
         }
         catch (Exception e) {
-            logger.error("Error parsing feed content: {}", e.getMessage());
+            LOGGER.error("Error parsing feed content: {}", e.getMessage());
         }
         return items;
+    }
+
+    private FeedItem createFeedItemFromEntry(SyndEntry entry) {
+        final FeedItem item = new FeedItem();
+        item.setTitle(entry.getTitle());
+        item.setFeedLink(entry.getLink());
+        item.setPublishedDate(
+                entry.getPublishedDate() != null
+                        ? entry.getPublishedDate().toInstant()
+                        : Instant.now()
+        );
+        if (entry.getDescription() != null) {
+            item.setDescription(entry.getDescription().getValue());
+        }
+        try {
+            final String textToSummarize =
+                    Jsoup.parse(item.getDescription() != null ? item.getDescription() : "").text();
+            final String summary = aiService.summarizeContent(textToSummarize).block();
+            item.setSummary(summary);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to summarize content for {}: {}", item.getFeedLink(), e.getMessage());
+        }
+        return item;
     }
 
     /**

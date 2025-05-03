@@ -105,6 +105,7 @@ public class FeedService {
     // Method to update specific fields using PATCH
     public Optional<Feed> patchFeed(String id, Map<String, Object> updates) {
         final Optional<Feed> optionalFeed = feedRepository.findById(id);
+        Optional<Feed> result = Optional.empty();
         if (optionalFeed.isPresent()) {
             final Feed feed = optionalFeed.get();
 
@@ -119,11 +120,9 @@ public class FeedService {
                 feed.setLastFetched(Instant.parse((String) updates.get("lastFetched")));
             }
 
-            // Add additional fields as needed
-
-            return Optional.of(feedRepository.save(feed));
+            result = Optional.of(feedRepository.save(feed));
         }
-        return Optional.empty();
+        return result;
     }
 
     public void deleteFeed(String id) {

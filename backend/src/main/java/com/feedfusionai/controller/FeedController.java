@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 @RequestMapping("/api/feeds")
 public class FeedController {
 
-    private static final Logger logger = LoggerFactory.getLogger(FeedController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeedController.class);
 
     @Autowired
     private FeedService feedService;
@@ -27,13 +27,13 @@ public class FeedController {
     // GET /api/feeds - Retrieve all feeds
     @GetMapping
     public List<Feed> getAllFeeds() {
-        logger.debug("Getting feed all feeds");
+        LOGGER.debug("Getting feed all feeds");
         return feedService.getAllFeeds();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Feed> getFeedById(@PathVariable String id) {
-        logger.debug("Getting feed for id {}", id);
+        LOGGER.debug("Getting feed for id {}", id);
         return feedService.getFeedById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -47,7 +47,7 @@ public class FeedController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<Feed> patchFeed(@PathVariable String id, @RequestBody Map<String, Object> updates) {
-        logger.debug("Patching feed id {} with, {}", id, updates);
+        LOGGER.debug("Patching feed id {} with, {}", id, updates);
         return feedService.patchFeed(id, updates)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -55,7 +55,7 @@ public class FeedController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFeed(@PathVariable String id) {
-        logger.debug("Deleting feed id {}", id);
+        LOGGER.debug("Deleting feed id {}", id);
         feedService.deleteFeed(id);
         return ResponseEntity.noContent().build();
     }

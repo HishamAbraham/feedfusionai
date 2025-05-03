@@ -14,7 +14,7 @@ import java.util.List;
 @RequestMapping("/api/feed-items")
 public class FeedItemController {
 
-    private static final Logger logger = LoggerFactory.getLogger(FeedItemController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeedItemController.class);
 
     @Autowired
     private FeedItemService feedItemService;
@@ -22,25 +22,25 @@ public class FeedItemController {
     // GET /api/feed-items - Retrieve all feed items
     @GetMapping
     public List<FeedItem> getAllFeedItems() {
-        logger.debug("Getting all feed items");
+        LOGGER.debug("Getting all feed items");
         return feedItemService.getAllFeedItems();
     }
 
     @GetMapping("unread")
     public List<FeedItem> getUnreadFeedItems() {
-        logger.debug("Getting all unread feed items");
+        LOGGER.debug("Getting all unread feed items");
         return feedItemService.getUnreadFeedItem();
     }
 
     @GetMapping("starred")
     public List<FeedItem> getStaredFeedItems() {
-        logger.debug("Getting all starred feed items");
+        LOGGER.debug("Getting all starred feed items");
         return feedItemService.getStaredFeedItem();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<FeedItem> getFeedItemById(@PathVariable String id) {
-        logger.debug("Getting feed item for feed item ID {}", id);
+        LOGGER.debug("Getting feed item for feed item ID {}", id);
         return feedItemService.getFeedItemById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -51,25 +51,25 @@ public class FeedItemController {
     // GET /api/feed-items/for-feed/{feedId} - Retrieve feed items for a specific feed
     @GetMapping("/for-feed/{feedId}")
     public List<FeedItem> getFeedItemsForFeed(@PathVariable String feedId) {
-        logger.debug("Getting feed items for feed ID {}", feedId);
+        LOGGER.debug("Getting feed items for feed ID {}", feedId);
         return feedItemService.getFeedItemsByFeedId(feedId);
     }
 
     @GetMapping("/for-feed/{feedId}/unread")
     public List<FeedItem> getUnreadFeedItemsForFeed(@PathVariable String feedId) {
-        logger.debug("Getting Unread feed items for feed ID {}", feedId);
+        LOGGER.debug("Getting Unread feed items for feed ID {}", feedId);
         return feedItemService.getUnreadFeedItemsByFeedId(feedId);
     }
 
     @GetMapping("/for-feed/{feedId}/starred")
     public List<FeedItem> getStaredFeedItemsForFeed(@PathVariable String feedId) {
-        logger.debug("Getting starred feed items for feed ID {}", feedId);
+        LOGGER.debug("Getting starred feed items for feed ID {}", feedId);
         return feedItemService.getStaredFeedItemsByFeedId(feedId);
     }
 
     @PatchMapping("/{id}/mark-read")
     public ResponseEntity<FeedItem> markFeedRead(@PathVariable String id) {
-        logger.debug("Marking feed item {} as read", id);
+        LOGGER.debug("Marking feed item {} as read", id);
         return feedItemService.markFeedRead(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -77,7 +77,7 @@ public class FeedItemController {
 
     @PatchMapping("/{id}/toggle-star")
     public ResponseEntity<FeedItem> toggleFeedIemStar(@PathVariable String id) {
-        logger.debug("Toggling star for feed item {}", id);
+        LOGGER.debug("Toggling star for feed item {}", id);
         return feedItemService.toggleFeedIemStar(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -85,7 +85,7 @@ public class FeedItemController {
 
     @PatchMapping("/{id}/resummarize")
     public reactor.core.publisher.Mono<ResponseEntity<String>> resummarizeFeedItem(@PathVariable String id) {
-        logger.debug("Resummarizing feed item {}", id);
+        LOGGER.debug("Resummarizing feed item {}", id);
         return feedItemService.resummarizeFeedItem(id)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
