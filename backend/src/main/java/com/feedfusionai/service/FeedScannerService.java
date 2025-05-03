@@ -136,7 +136,7 @@ public class FeedScannerService {
                 }
             }
             for (SyndEntry entry : feed.getEntries()) {
-                FeedItem item = createFeedItemFromEntry(entry);
+                final FeedItem item = createFeedItemFromEntry(entry);
                 items.add(item);
             }
         }
