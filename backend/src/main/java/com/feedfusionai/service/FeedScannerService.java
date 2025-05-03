@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -31,10 +32,12 @@ import java.util.Objects;
 public class FeedScannerService {
 
     private final FeedRepository feedRepository;
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     private final FeedItemRepository feedItemRepository;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeedScannerService.class);
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     private final RestTemplate restTemplate;
     private final AiService aiService;
 
@@ -44,10 +47,10 @@ public class FeedScannerService {
             RestTemplate restTemplate,
             AiService aiService
     ) {
-        this.feedRepository     = feedRepository;
-        this.feedItemRepository = feedItemRepository;
-        this.restTemplate       = restTemplate;
-        this.aiService          = aiService;
+        this.feedRepository     = Objects.requireNonNull(feedRepository);
+        this.feedItemRepository = Objects.requireNonNull(feedItemRepository);
+        this.restTemplate       = Objects.requireNonNull(restTemplate);
+        this.aiService          = Objects.requireNonNull(aiService);
     }
 
     public int scanFeeds() {
@@ -103,7 +106,7 @@ public class FeedScannerService {
 
                 LOGGER.info("Scanned feed {}: added {} new items", f.getUrl(), newCount);
             }
-            catch (Exception ex) {
+            catch (IOException ex) {
                 LOGGER.error("Error scanning feed {}: {}", f.getUrl(), ex.getMessage());
             }
         }

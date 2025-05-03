@@ -4,6 +4,7 @@ import com.feedfusionai.model.Feed;
 import com.feedfusionai.repository.FeedItemRepository;
 import com.feedfusionai.repository.FeedRepository;
 import com.rometools.rome.feed.synd.SyndFeed;
+import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
+import org.xml.sax.SAXException;
 import org.jdom2.input.SAXBuilder;
+import org.jdom2.JDOMException;
+import java.io.IOException;
 
 @Service
 public class FeedService {
@@ -59,25 +64,7 @@ public class FeedService {
             final InputSource inputSource = new InputSource(feedUrl.openStream());
 
             final SAXBuilder saxBuilder = new SAXBuilder();
-            saxBuilder.setXMLReaderFactory(new org.jdom2.input.sax.XMLReaderJDOMFactory() {
-                @Override
-                public XMLReader createXMLReader() {
-                    return xmlReader;
-                }
-
-                @Override
-                public boolean isValidating() {
-                    return false;
-                }
-
-                public boolean isIgnoringElementContentWhitespace() {
-                    return false;
-                }
-
-                public boolean isExpandEntities() {
-                    return false;
-                }
-            });
+            saxBuilder.setXMLReaderFactory(new NonValidatingXmlReaderFactory(xmlReader));
 
             final SyndFeedInput input = new SyndFeedInput();
             final org.jdom2.Document document = saxBuilder.build(inputSource);
@@ -94,7 +81,7 @@ public class FeedService {
 
             feed.setLastFetched(Instant.now());
             feed.setUnreadCount(0);
-        } catch (Exception e) {
+        } catch (IOException | JDOMException | ParserConfigurationException | SAXException | FeedException e) {
             throw new RuntimeException("Failed to retrieve feed metadata from " + feed.getUrl(), e);
         }
 
@@ -128,9 +115,25 @@ public class FeedService {
     public void deleteFeed(String id) {
         // 1) remove all items for that feed
         feedItemRepository.deleteByFeedId(id);
-//	"url": "https://www.theguardian.com/uk/rss",
         // 2) then delete the feed itself
         feedRepository.deleteById(id);
     }
 
+    private static class NonValidatingXmlReaderFactory implements org.jdom2.input.sax.XMLReaderJDOMFactory {
+        private final XMLReader xmlReader;
+
+        public NonValidatingXmlReaderFactory(XMLReader xmlReader) {
+            this.xmlReader = xmlReader;
+        }
+
+        @Override
+        public XMLReader createXMLReader() {
+            return xmlReader;
+        }
+
+        @Override
+        public boolean isValidating() {
+            return false;
+        }
+    }
 }
