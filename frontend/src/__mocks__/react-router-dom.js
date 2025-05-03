@@ -5,6 +5,8 @@ export const BrowserRouter = ({ children }) => children;
 
 // If you use other exports from react-router-dom, stub them too:
 export const Link = ({ to, children, ...rest }) => (
-    <a href={to} {...rest}>{children}</a>
+  <a href={to} {...rest}>
+    {children}
+  </a>
 );
 // etc.

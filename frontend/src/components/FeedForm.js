@@ -1,11 +1,12 @@
 // src/components/FeedForm.js
-import React, { useState, useEffect } from "react";
-import { API_BASE } from "../config";
+import React, { useState, useEffect } from 'react';
+
+import { API_BASE } from '../config';
 
 const FeedForm = ({ feed, onSuccess, onCancel }) => {
   // Only store the URL in local state; title comes from the backend
-  const [url, setUrl] = useState(feed?.url || "");
-  const [error, setError] = useState("");
+  const [url, setUrl] = useState(feed?.url || '');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (feed) {
@@ -15,18 +16,16 @@ const FeedForm = ({ feed, onSuccess, onCancel }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
     // Decide endpoint + method
-    const apiUrl = feed
-        ? `${API_BASE}/feeds/${feed.id}`
-        : `${API_BASE}/feeds`;
-    const method = feed ? "PATCH" : "POST";
+    const apiUrl = feed ? `${API_BASE}/feeds/${feed.id}` : `${API_BASE}/feeds`;
+    const method = feed ? 'PATCH' : 'POST';
 
     try {
       const res = await fetch(apiUrl, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url }),
       });
       if (!res.ok) {
@@ -44,11 +43,14 @@ const FeedForm = ({ feed, onSuccess, onCancel }) => {
   };
 
   return (
-    <div className="modal fade show" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
+    <div
+      className="modal fade show"
+      style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+    >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title">{feed ? "Edit Feed" : "Add New Feed"}</h5>
+            <h5 className="modal-title">{feed ? 'Edit Feed' : 'Add New Feed'}</h5>
             <button type="button" className="btn-close" onClick={onCancel}></button>
           </div>
           <div className="modal-body">
@@ -62,7 +64,9 @@ const FeedForm = ({ feed, onSuccess, onCancel }) => {
                 </div>
               )}
               <div className="mb-3">
-                <label htmlFor="feedUrl" className="form-label">URL:</label>
+                <label htmlFor="feedUrl" className="form-label">
+                  URL:
+                </label>
                 <input
                   id="feedUrl"
                   type="url"
@@ -80,7 +84,7 @@ const FeedForm = ({ feed, onSuccess, onCancel }) => {
               Cancel
             </button>
             <button type="submit" form="feed-form" className="btn btn-primary">
-              {feed ? "Update Feed" : "Add Feed"}
+              {feed ? 'Update Feed' : 'Add Feed'}
             </button>
           </div>
         </div>
