@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 
 @Component("ollama")
@@ -26,10 +27,13 @@ public class OllamaAiClient implements AiClient {
         final String prompt = "Summarize the following content:\n\n" + content;
 
         return webClient.post()
-                .uri("/api/generate")
+                .uri("/api/chat")
                 .bodyValue(Map.of(
                         "model", model,
-                        "prompt", prompt,
+                        "messages", List.of(
+                                Map.of("role", "system", "content", "You are a helpful assistant."),
+                                Map.of("role", "user", "content", prompt)
+                        ),
                         "stream", false
                 ))
                 .retrieve()
@@ -43,10 +47,13 @@ public class OllamaAiClient implements AiClient {
         final String prompt = "Generate relevant short tags for this content (comma separated):\n\n" + content;
 
         return webClient.post()
-                .uri("/api/generate")
+                .uri("/api/chat")
                 .bodyValue(Map.of(
                         "model", model,
-                        "prompt", prompt,
+                        "messages", List.of(
+                                Map.of("role", "system", "content", "You are a helpful assistant."),
+                                Map.of("role", "user", "content", prompt)
+                        ),
                         "stream", false
                 ))
                 .retrieve()
