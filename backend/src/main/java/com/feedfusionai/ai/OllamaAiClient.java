@@ -27,7 +27,7 @@ public class OllamaAiClient implements AiClient {
         final String prompt = "Summarize the following content:\n\n" + content;
 
         return webClient.post()
-                .uri("/api/chat")
+                .uri("/api/generate")
                 .bodyValue(Map.of(
                         "model", model,
                         "messages", List.of(
@@ -47,7 +47,7 @@ public class OllamaAiClient implements AiClient {
         final String prompt = "Generate relevant short tags for this content (comma separated):\n\n" + content;
 
         return webClient.post()
-                .uri("/api/chat")
+                .uri("/api/generate")
                 .bodyValue(Map.of(
                         "model", model,
                         "messages", List.of(
