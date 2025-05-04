@@ -1,10 +1,11 @@
+package com.feedfusionai.ai;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.tcp.TcpClient;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import java.util.concurrent.TimeUnit;
-package com.feedfusionai.ai;
+
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
