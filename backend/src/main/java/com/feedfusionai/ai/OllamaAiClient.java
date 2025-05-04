@@ -30,10 +30,7 @@ public class OllamaAiClient implements AiClient {
                 .uri("/api/generate")
                 .bodyValue(Map.of(
                         "model", model,
-                        "messages", List.of(
-                                Map.of("role", "system", "content", "You are a helpful assistant."),
-                                Map.of("role", "user", "content", prompt)
-                        ),
+                        "prompt", prompt,
                         "stream", false
                 ))
                 .retrieve()
@@ -50,10 +47,7 @@ public class OllamaAiClient implements AiClient {
                 .uri("/api/generate")
                 .bodyValue(Map.of(
                         "model", model,
-                        "messages", List.of(
-                                Map.of("role", "system", "content", "You are a helpful assistant."),
-                                Map.of("role", "user", "content", prompt)
-                        ),
+                        "prompt", prompt,
                         "stream", false
                 ))
                 .retrieve()
