@@ -27,7 +27,8 @@ public class OllamaAiClient implements AiClient {
         TcpClient tcpClient = TcpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) connectTimeoutMillis)
                 .doOnConnected(conn ->
-                        conn.addHandlerLast(new ReadTimeoutHandler(readTimeoutMillis, TimeUnit.MILLISECONDS)));
+                        conn.addHandlerLast(new ReadTimeoutHandler(readTimeoutMillis, TimeUnit.MILLISECONDS))
+                            .addHandlerLast(new io.netty.handler.timeout.WriteTimeoutHandler(readTimeoutMillis, TimeUnit.MILLISECONDS)));
 
         this.webClient = WebClient.builder()
                 .baseUrl(baseUrl)
