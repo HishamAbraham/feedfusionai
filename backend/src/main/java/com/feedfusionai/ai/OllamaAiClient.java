@@ -30,11 +30,13 @@ public class OllamaAiClient implements AiClient {
         final TcpClient tcpClient = TcpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) connectTimeoutMillis)
                 .doOnConnected(conn ->
-                        conn.addHandlerLast(new ReadTimeoutHandler(readTimeoutMillis, java.util.concurrent.TimeUnit.MILLISECONDS)));
+                        conn.addHandlerLast(new ReadTimeoutHandler(readTimeoutMillis,
+                                java.util.concurrent.TimeUnit.MILLISECONDS)));
 
         this.webClient = WebClient.builder()
                 .baseUrl(baseUrl)
-                .clientConnector(new org.springframework.http.client.reactive.ReactorClientHttpConnector(HttpClient.from(tcpClient)))
+                .clientConnector(new org.springframework.http.client.reactive.ReactorClientHttpConnector(
+                        HttpClient.from(tcpClient)))
                 .build();
         this.model = model;
     }
