@@ -145,6 +145,25 @@ function FeedItemList({ feedId, onItemMarkedRead, darkMode }) {
       });
   };
 
+  const handleRetag = (itemId) => {
+    return fetch(`${API_BASE}/feed-items/${itemId}/retag`, {
+      method: 'PATCH',
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.text().then((text) => {
+            throw new Error(text);
+          });
+        }
+        return res.json();
+      })
+      .then((tags) => {
+        setFeedItems((prevItems) =>
+          prevItems.map((item) => (item.id === itemId ? { ...item, tags } : item))
+        );
+      });
+  };
+
   if (loading)
     return (
       <div className="d-flex justify-content-center my-5">
@@ -190,6 +209,7 @@ function FeedItemList({ feedId, onItemMarkedRead, darkMode }) {
                 onToggleStar={toggleStar}
                 onReadMore={openReadMore}
                 onResummarize={handleResummarize}
+                onRetag={handleRetag}
               />
             </div>
           ))}

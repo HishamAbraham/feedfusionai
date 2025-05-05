@@ -11,7 +11,7 @@ import { faStar as regularStar } from '@fortawesome/free-regular-svg-icons';
 
 import { sanitizeAndTransform } from '../utils/sanitizeHtml';
 
-const FeedItemCard = ({ item, onMarkAsRead, onToggleStar, onResummarize }) => {
+const FeedItemCard = ({ item, onMarkAsRead, onToggleStar, onResummarize, onRetag }) => {
   const renderDescription = (description) => {
     if (typeof description === 'string') {
       return sanitizeAndTransform(description);
@@ -46,6 +46,16 @@ const FeedItemCard = ({ item, onMarkAsRead, onToggleStar, onResummarize }) => {
           <p className="small mb-0">{item.summary}</p>
         </div>
       )}
+      {item.tags && item.tags.length > 0 && (
+        <div className="mb-2">
+          <div className="small text-muted mb-1">🏷️ <strong>Tags</strong></div>
+          <div className="d-flex flex-wrap gap-1">
+            {item.tags.map((tag, index) => (
+              <span key={index} className="badge bg-secondary text-lowercase">{tag}</span>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="d-flex justify-content-start align-items-center gap-2 mt-2 flex-wrap">
         <a
           href={item.feedLink}
@@ -72,6 +82,21 @@ const FeedItemCard = ({ item, onMarkAsRead, onToggleStar, onResummarize }) => {
             setIsRefreshing(true);
             try {
               await onResummarize(item.id);
+            } finally {
+              setIsRefreshing(false);
+            }
+          }}
+          disabled={isRefreshing}
+        >
+          <FontAwesomeIcon icon={faRotateRight} spin={isRefreshing} />
+        </button>
+        <button
+          className="btn feed-item-action-button btn-outline-secondary"
+          title="Regenerate Tags"
+          onClick={async () => {
+            setIsRefreshing(true);
+            try {
+              await onRetag(item.id);
             } finally {
               setIsRefreshing(false);
             }
