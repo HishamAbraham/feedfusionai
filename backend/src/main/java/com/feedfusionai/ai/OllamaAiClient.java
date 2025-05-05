@@ -73,7 +73,7 @@ public class OllamaAiClient implements AiClient {
                 .bodyToMono(Map.class)
                 .map(response -> (String) response.getOrDefault("response", ""))
                 .onErrorResume(WebClientResponseException.class, e -> {
-                    System.err.println("Ollama tag generation failed: " + e.getResponseBodyAsString());
+                    LOGGER.error("Ollama tag generation failed: " + e.getResponseBodyAsString());
                     return Mono.error(new RuntimeException("Ollama tag generation failed", e));
                 });
     }
