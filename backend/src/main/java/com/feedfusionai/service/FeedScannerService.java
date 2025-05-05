@@ -166,6 +166,19 @@ public class FeedScannerService {
                     Jsoup.parse(item.getDescription() != null ? item.getDescription() : "").text();
             final String summary = aiService.summarizeContent(textToSummarize).block();
             item.setSummary(summary);
+            try {
+                final String tagString = aiService.generateTags(textToSummarize)
+                                            .blockOptional()
+                                            .orElse("");
+                final List<String> tags = List.of(tagString.split(","));
+                final List<String> normalized = tags.stream()
+                                              .map(t -> t.toLowerCase(Locale.ROOT).trim())
+                                              .filter(t -> !t.isBlank())
+                                              .toList();
+                item.setTags(normalized);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to tag content for {}: {}", item.getFeedLink(), e.getMessage());
+            }
         } catch (Exception e) {
             LOGGER.warn("Failed to summarize content for {}: {}", item.getFeedLink(), e.getMessage());
         }
