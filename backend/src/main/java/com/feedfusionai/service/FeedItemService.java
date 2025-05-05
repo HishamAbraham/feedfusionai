@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Arrays;
 
 @Service
 public class FeedItemService {
@@ -109,4 +110,23 @@ public class FeedItemService {
     }
 
 
+    public Mono<List<String>> retagFeedItem(String id) {
+        return Mono.fromCallable(() -> feedItemRepository.findById(id))
+                .flatMap(optionalItem -> optionalItem.map(Mono::just).orElseGet(Mono::empty))
+                .flatMap(item -> {
+                    final String content = Jsoup.parse(
+                            item.getDescription() != null ? item.getDescription() : ""
+                    ).text();
+                    return aiService.generateTags(content)
+                            .flatMap(tagString -> {
+                                final List<String> normalizedTags = Arrays.stream(tagString.split(","))
+                                        .map(String::trim)
+                                        .map(String::toLowerCase)
+                                        .toList();
+                                item.setTags(normalizedTags);
+                                return Mono.fromCallable(() -> feedItemRepository.save(item))
+                                        .thenReturn(normalizedTags);
+                            });
+                });
+    }
 }

@@ -90,4 +90,14 @@ public class FeedItemController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @PatchMapping("/{id}/retag")
+    public reactor.core.publisher.Mono<ResponseEntity<List<String>>> retagFeedItem(@PathVariable String id) {
+        LOGGER.debug("Retagging feed item {}", id);
+        return feedItemService.retagFeedItem(id)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+
 }

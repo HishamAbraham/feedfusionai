@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @Document(collection = "feedItems")
@@ -24,4 +25,5 @@ public class FeedItem {
     private Boolean read;
     private boolean starred;
     private String summary;
+    private List<String> tags;
 }
