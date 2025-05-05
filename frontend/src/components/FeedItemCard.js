@@ -48,10 +48,14 @@ const FeedItemCard = ({ item, onMarkAsRead, onToggleStar, onResummarize, onRetag
       )}
       {item.tags && item.tags.length > 0 && (
         <div className="mb-2">
-          <div className="small text-muted mb-1">🏷️ <strong>Tags</strong></div>
+          <div className="small text-muted mb-1">
+            🏷️ <strong>Tags</strong>
+          </div>
           <div className="d-flex flex-wrap gap-1">
             {item.tags.map((tag, index) => (
-              <span key={index} className="badge bg-secondary text-lowercase">{tag}</span>
+              <span key={index} className="badge bg-secondary text-lowercase">
+                {tag}
+              </span>
             ))}
           </div>
         </div>
