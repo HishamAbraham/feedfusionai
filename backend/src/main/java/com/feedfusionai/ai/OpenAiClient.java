@@ -43,7 +43,9 @@ public class OpenAiClient implements AiClient {
     private Object[] buildTaggingPrompt(String content) {
         return new Object[] {
             Map.of("role", "system", "content",
-                "You are an assistant that extracts relevant, concise, lowercase tags from the article. Avoid duplicates and return them as a comma-separated list only."),
+                "You are an assistant that extracts relevant, " +
+                        "concise, lowercase tags from the article. " +
+                        "Avoid duplicates and return them as a comma-separated list only."),
             Map.of("role", "user", "content",
                 "List 3 to 5 relevant and concise tags for this article, separated by commas:\n\n" + content)
         };

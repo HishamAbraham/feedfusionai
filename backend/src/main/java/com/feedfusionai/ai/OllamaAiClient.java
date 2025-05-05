@@ -11,8 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.Arrays;
-import java.util.List;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +60,8 @@ public class OllamaAiClient implements AiClient {
 
     @Override
     public Mono<String> generateTags(String content) {
-        final String prompt = "Generate a comma-separated list of relevant tags for the following content:\n\n" + content;
+        final String prompt =
+                "Generate a comma-separated list of relevant tags for the following content:\n\n" + content;
 
         return webClient.post()
                 .uri("/api/generate")
@@ -72,7 +72,7 @@ public class OllamaAiClient implements AiClient {
                 .retrieve()
                 .bodyToMono(Map.class)
                 .map(response -> (String) response.getOrDefault("response", ""))
-                .onErrorResume(org.springframework.web.reactive.function.client.WebClientResponseException.class, e -> {
+                .onErrorResume(WebClientResponseException.class, e -> {
                     System.err.println("Ollama tag generation failed: " + e.getResponseBodyAsString());
                     return Mono.error(new RuntimeException("Ollama tag generation failed", e));
                 });
