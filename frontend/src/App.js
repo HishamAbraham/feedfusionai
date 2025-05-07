@@ -8,7 +8,6 @@ import FeedItemList from './components/FeedItemList';
 import FeedForm from './components/FeedForm';
 import { API_BASE } from './config';
 import './css/App.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   const [selectedFeedId, setSelectedFeedId] = useState(null);
@@ -111,57 +110,61 @@ function App() {
 
   return (
     <Router>
-      <div className={`app-container ${darkMode ? 'bg-dark text-light' : 'bg-light text-dark'}`}>
-        <Header
-          onAddFeed={handleAddFeed}
-          onRefreshFeeds={handleRefreshFeeds}
-          onToggleDarkMode={toggleDarkMode}
-          darkMode={darkMode}
-          isRefreshing={isRefreshing}
-        />
-        <div className="d-flex justify-content-start m-2">
-          <button
-            className="btn btn-sm btn-outline-secondary"
-            onClick={() => setSidebarOpen((prev) => !prev)}
-          >
-            {sidebarOpen ? 'Hide Feeds' : 'Show Feeds'}
-          </button>
-        </div>
-
-        {refreshResult !== null && (
-          <div className="alert alert-success text-center mx-3">
-            🚀 {refreshResult} new items added
+      <div className={darkMode ? 'dark' : ''}>
+        <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+          <Header
+            onAddFeed={handleAddFeed}
+            onRefreshFeeds={handleRefreshFeeds}
+            onToggleDarkMode={toggleDarkMode}
+            darkMode={darkMode}
+            isRefreshing={isRefreshing}
+          />
+          <div className="flex justify-start m-2">
+            <button
+              className="px-3 py-1 text-sm border border-gray-500 rounded hover:bg-gray-100 transition"
+              onClick={() => setSidebarOpen((prev) => !prev)}
+            >
+              {sidebarOpen ? 'Hide Feeds' : 'Show Feeds'}
+            </button>
           </div>
-        )}
 
-        {showFeedForm && (
-          <FeedForm feed={editingFeed} onSuccess={handleFormSubmit} onCancel={handleCancelForm} />
-        )}
-
-        <div className="d-flex" style={{ height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
-          {/* Sidebar */}
-          {sidebarOpen && (
-            <div className="sidebar bg-light border-end">
-              <FeedDashboard
-                onSelectFeed={setSelectedFeedId}
-                onEditFeed={handleEditFeed}
-                refreshTrigger={refreshTrigger}
-              />
+          {refreshResult !== null && (
+            <div className="text-center text-green-800 bg-green-100 border border-green-200 px-4 py-2 rounded mx-3">
+              🚀 {refreshResult} new items added
             </div>
           )}
 
-          {/* Main Content */}
-          <div className="main-content p-3">
-            {selectedFeedId ? (
-              <FeedItemList
-                feedId={selectedFeedId}
-                onItemMarkedRead={() => setRefreshTrigger((prev) => prev + 1)}
-              />
-            ) : (
-              <div className="placeholder">
-                <h2>Select a feed to see its items</h2>
+          {showFeedForm && (
+            <FeedForm feed={editingFeed} onSuccess={handleFormSubmit} onCancel={handleCancelForm} />
+          )}
+
+          <div className="flex flex-row flex-1 overflow-hidden">
+            {/* Sidebar */}
+            {sidebarOpen && (
+              <div className="w-[280px] flex-shrink-0 bg-gray-100 dark:bg-gray-800 border-r border-gray-300 dark:border-gray-600 overflow-y-auto">
+                <FeedDashboard
+                  onSelectFeed={setSelectedFeedId}
+                  onEditFeed={handleEditFeed}
+                  refreshTrigger={refreshTrigger}
+                  darkMode={darkMode}
+                />
               </div>
             )}
+
+            {/* Main Content */}
+            <div className="flex-1 p-4 overflow-y-auto bg-transparent dark:bg-gray-900">
+              {selectedFeedId ? (
+                <FeedItemList
+                  feedId={selectedFeedId}
+                  onItemMarkedRead={() => setRefreshTrigger((prev) => prev + 1)}
+                  darkMode={darkMode}
+                />
+              ) : (
+                <div className="text-center text-gray-500 mt-10">
+                  <h2 className="text-xl font-medium">Select a feed to see its items</h2>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

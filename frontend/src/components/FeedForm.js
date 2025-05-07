@@ -19,7 +19,7 @@ const FeedForm = ({ feed, onSuccess, onCancel }) => {
     setError('');
 
     // Decide endpoint + method
-    const apiUrl = feed ? `${API_BASE}/feeds/${feed.id}` : `${API_BASE}/feeds`;
+    const apiUrl = `${API_BASE}/feeds${feed?.id ? `/${feed.id}` : ''}`;
     const method = feed ? 'PATCH' : 'POST';
 
     try {
@@ -43,50 +43,72 @@ const FeedForm = ({ feed, onSuccess, onCancel }) => {
   };
 
   return (
-    <div
-      className="modal fade show"
-      style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
-    >
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">{feed ? 'Edit Feed' : 'Add New Feed'}</h5>
-            <button type="button" className="btn-close" onClick={onCancel}></button>
-          </div>
-          <div className="modal-body">
-            {error && <div className="alert alert-danger">{error}</div>}
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
+        <div className="flex justify-between items-center px-5 py-4 border-b dark:border-gray-700">
+          <h2 className="text-lg font-semibold">{feed ? 'Edit Feed' : 'Add New Feed'}</h2>
+          <button
+            type="button"
+            className="text-gray-500 hover:text-gray-700 dark:hover:text-white"
+            onClick={onCancel}
+            aria-label="Close form"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="p-4">
+          {error && (
+            <div className="mb-4 text-sm text-red-700 bg-red-100 border border-red-200 rounded px-4 py-3">
+              {error}
+            </div>
+          )}
 
-            <form id="feed-form" onSubmit={handleSubmit}>
-              {feed && (
-                <div className="mb-3">
-                  <label className="form-label">Title:</label>
-                  <input type="text" className="form-control" value={feed.title} disabled />
-                </div>
-              )}
-              <div className="mb-3">
-                <label htmlFor="feedUrl" className="form-label">
-                  URL:
+          <form id="feed-form" onSubmit={handleSubmit}>
+            {feed && (
+              <div className="mb-4">
+                <label htmlFor="feedTitle" className="block text-sm font-medium mb-1">
+                  Title:
                 </label>
                 <input
-                  id="feedUrl"
-                  type="url"
-                  className="form-control"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="Enter feed URL"
-                  required
+                  id="feedTitle"
+                  type="text"
+                  className="w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2"
+                  value={feed.title}
+                  disabled
                 />
               </div>
-            </form>
-          </div>
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onCancel}>
-              Cancel
-            </button>
-            <button type="submit" form="feed-form" className="btn btn-primary">
-              {feed ? 'Update Feed' : 'Add Feed'}
-            </button>
-          </div>
+            )}
+            <div className="mb-4">
+              <label htmlFor="feedUrl" className="block text-sm font-medium mb-1">
+                URL:
+              </label>
+              <input
+                id="feedUrl"
+                type="url"
+                className="w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="Enter feed URL"
+                required
+              />
+            </div>
+          </form>
+        </div>
+        <div className="flex justify-end items-center gap-3 px-5 py-4 border-t dark:border-gray-700">
+          <button
+            type="button"
+            className="px-4 py-2 rounded border text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            onClick={onCancel}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="feed-form"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            {feed ? 'Update Feed' : 'Add Feed'}
+          </button>
         </div>
       </div>
     </div>
