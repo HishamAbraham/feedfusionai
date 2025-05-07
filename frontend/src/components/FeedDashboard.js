@@ -44,9 +44,11 @@ function FeedDashboard({ onSelectFeed, refreshTrigger, darkMode }) {
   };
 
   return (
-    <div className={darkMode ? 'bg-dark text-light' : 'bg-white text-dark'}>
-      <div className="card-body p-3">
-        <h5 className="card-title">Your Feeds</h5>
+    <div
+      className={`${darkMode ? 'bg-gray-900 text-white border-r border-gray-700' : 'bg-white text-gray-900 border-r border-gray-200'} w-[280px] shrink-0 overflow-y-auto`}
+    >
+      <div className="p-4">
+        <h2 className="text-xl font-semibold mb-4">Your Feeds</h2>
 
         {showFeedForm && (
           <FeedForm
@@ -60,72 +62,57 @@ function FeedDashboard({ onSelectFeed, refreshTrigger, darkMode }) {
         )}
 
         {loading && !showFeedForm && (
-          <div className="d-flex justify-content-center my-5">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading feeds...</span>
-            </div>
+          <div className="flex justify-center my-5">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-800 dark:border-blue-300" />
           </div>
         )}
 
         {!loading && feeds.length === 0 && !showFeedForm && (
-          <div className="alert alert-info text-center">No feeds found. Add a new feed!</div>
+          <div className="text-center text-blue-800 dark:text-blue-300 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 px-4 py-2 rounded">
+            No feeds found. Add a new feed!
+          </div>
         )}
 
         {!loading && feeds.length > 0 && (
-          <div className="vstack gap-1">
+          <div className="flex flex-col gap-3">
             {feeds.map((feed) => (
               <div
                 key={feed.id}
-                className={`card py-2 px-2 shadow-sm ${darkMode ? 'bg-dark text-light' : ''}`}
+                className={`p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-md transition bg-white dark:bg-gray-800 text-gray-900 dark:text-white`}
                 onClick={() => onSelectFeed && onSelectFeed(feed.id)}
-                style={{ cursor: 'pointer' }}
               >
-                <div
-                  className="d-flex align-items-center justify-content-between"
-                  style={{ minWidth: 0 }}
-                >
-                  {/* Feed Icon and Unread Count on first line */}
-                  <div className="d-flex align-items-center flex-grow-1" style={{ minWidth: 0 }}>
-                    {feed.imageUrl && (
-                      <img
-                        src={feed.imageUrl}
-                        alt={feed.title}
-                        className="me-2 flex-shrink-0"
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          objectFit: 'cover',
-                          borderRadius: '5px',
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    )}
-                    {feed.unreadCount !== undefined && (
-                      <span className="text-danger small flex-shrink-0">
-                        ({feed.unreadCount} unread)
-                      </span>
-                    )}
-                  </div>
+                <div className="flex items-center gap-2">
+                  {feed.imageUrl && (
+                    <img
+                      src={feed.imageUrl}
+                      alt={feed.title}
+                      className="w-10 h-10 object-cover rounded"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )}
+                  {feed.unreadCount !== undefined && (
+                    <span className="text-sm text-red-600 dark:text-red-400 flex-shrink-0">
+                      ({feed.unreadCount} unread)
+                    </span>
+                  )}
                 </div>
 
-                {/* Second line: Feed Title */}
                 <div className="mt-1">
-                  <h6 className="mb-0 text-truncate" style={{ maxWidth: '100%' }}>
+                  <h6 className="text-sm font-medium truncate text-gray-800 dark:text-gray-200">
                     {feed.title}
                   </h6>
                 </div>
 
-                {/* Third line: Edit/Delete Buttons */}
-                <div className="d-flex justify-content-end mt-2 gap-2">
+                <div className="flex justify-end mt-2 gap-2">
                   <button
-                    className="btn sidebar-action-button btn-light border"
+                    className="p-2 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                     title="Edit Feed"
                     onClick={(e) => handleEditFeed(feed, e)}
                   >
                     <FontAwesomeIcon icon={faEdit} />
                   </button>
                   <button
-                    className="btn sidebar-action-button btn-light border"
+                    className="p-2 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                     title="Delete Feed"
                     onClick={(e) => handleDeleteFeed(feed.id, e)}
                   >

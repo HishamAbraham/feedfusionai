@@ -166,55 +166,69 @@ function FeedItemList({ feedId, onItemMarkedRead, darkMode }) {
 
   if (loading)
     return (
-      <div className="d-flex justify-content-center my-5">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading feed items...</span>
-        </div>
+      <div className="flex justify-center my-5">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 dark:border-blue-300" />
       </div>
     );
-  if (error) return <div className="alert alert-danger text-center">Error: {error}</div>;
+  if (error)
+    return (
+      <div className="text-center text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900 border border-red-200 dark:border-red-700 px-4 py-2 rounded">
+        Error: {error}
+      </div>
+    );
 
   return (
-    <div className="feed-item-list">
-      <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-        <h5 className="mb-0 text-truncate" style={{ maxWidth: '300px' }}>
-          Feed Items for {feedTitle || 'Feed'}
-        </h5>
-        <div className="btn-group">
-          <button className="btn btn-sm btn-outline-success" onClick={markAllAsRead}>
-            Mark All As Read
-          </button>
-          <button className="btn btn-sm btn-outline-primary" onClick={toggleView}>
-            {viewReadOnly ? 'View Unread' : 'View Read'}
-          </button>
-          <button className="btn btn-sm btn-outline-warning" onClick={toggleStarredView}>
-            {viewStarredOnly ? 'View All Items' : 'View Starred Only'}
-          </button>
-        </div>
-      </div>
-      {displayedItems.length === 0 ? (
-        <div className="alert alert-warning text-center small">
-          No feed items to display. Please check your filters or add new feeds!
-        </div>
-      ) : (
-        <div className="feed-card-container">
-          {displayedItems.map((item) => (
-            <div
-              key={item.id}
-              className={`border-bottom ${darkMode ? 'bg-dark text-light' : 'bg-white text-dark'}`}
+    <div
+      className={`${darkMode ? 'bg-gray-900 text-white border-l border-gray-700' : 'bg-white text-gray-900 border-l border-gray-200'} flex-1 overflow-y-auto`}
+    >
+      <div className="p-4">
+        <div className="flex flex-wrap justify-between items-center mb-3 gap-2">
+          <h2 className="truncate max-w-[300px] font-semibold text-xl">
+            Feed Items for {feedTitle || 'Feed'}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            <button
+              className="px-3 py-1 rounded border border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-800 text-sm"
+              onClick={markAllAsRead}
             >
-              <FeedItemCard
-                item={item}
-                onMarkAsRead={markItemAsRead}
-                onToggleStar={toggleStar}
-                onReadMore={openReadMore}
-                onResummarize={handleResummarize}
-                onRetag={handleRetag}
-              />
-            </div>
-          ))}
+              Mark All As Read
+            </button>
+            <button
+              className="px-3 py-1 rounded border border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-800 text-sm"
+              onClick={toggleView}
+            >
+              {viewReadOnly ? 'View Unread' : 'View Read'}
+            </button>
+            <button
+              className="px-3 py-1 rounded border border-yellow-500 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-800 text-sm"
+              onClick={toggleStarredView}
+            >
+              {viewStarredOnly ? 'View All Items' : 'View Starred Only'}
+            </button>
+          </div>
         </div>
-      )}
+        {displayedItems.length === 0 ? (
+          <div className="text-center text-yellow-800 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 px-4 py-2 text-sm rounded">
+            No feed items to display. Please check your filters or add new feeds!
+          </div>
+        ) : (
+          <div className="space-y-4 bg-transparent">
+            {displayedItems.map((item) => (
+              <div key={item.id} className="bg-transparent">
+                <FeedItemCard
+                  item={item}
+                  onMarkAsRead={markItemAsRead}
+                  onToggleStar={toggleStar}
+                  onReadMore={openReadMore}
+                  onResummarize={handleResummarize}
+                  onRetag={handleRetag}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>{' '}
+      {/* End of p-4 wrapper */}
     </div>
   );
 }
