@@ -50,7 +50,7 @@ class FeedServiceTest {
         when(feedRepository.save(any(Feed.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Call the patchFeed method.
-        Optional<Feed> updatedOpt = feedService.patchFeed("1", updates);
+        Optional<Feed> updatedOpt = feedService.patchFeed("1", "test-user", updates);
         assertTrue(updatedOpt.isPresent());
         Feed updatedFeed = updatedOpt.get();
 

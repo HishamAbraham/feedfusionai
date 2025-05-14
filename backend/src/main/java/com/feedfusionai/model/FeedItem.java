@@ -17,7 +17,7 @@ public class FeedItem {
 
     // Reference to the parent feed's ID
     private String feedId;
-
+    private String ownerId;
     private String title;
     private String feedLink;
     private Instant publishedDate;

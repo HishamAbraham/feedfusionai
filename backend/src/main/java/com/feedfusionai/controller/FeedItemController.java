@@ -1,5 +1,7 @@
 package com.feedfusionai.controller;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import com.feedfusionai.model.FeedItem;
 import com.feedfusionai.service.FeedItemService;
 import org.slf4j.Logger;
@@ -22,26 +24,30 @@ public class FeedItemController {
     // GET /api/feed-items - Retrieve all feed items
     @GetMapping
     public List<FeedItem> getAllFeedItems() {
-        LOGGER.debug("Getting all feed items");
-        return feedItemService.getAllFeedItems();
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Getting all feed items for user {}", userId);
+        return feedItemService.getAllFeedItems(userId);
     }
 
     @GetMapping("unread")
     public List<FeedItem> getUnreadFeedItems() {
-        LOGGER.debug("Getting all unread feed items");
-        return feedItemService.getUnreadFeedItem();
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Getting all unread feed items for user {}", userId);
+        return feedItemService.getUnreadFeedItem(userId);
     }
 
     @GetMapping("starred")
     public List<FeedItem> getStaredFeedItems() {
-        LOGGER.debug("Getting all starred feed items");
-        return feedItemService.getStaredFeedItem();
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Getting all starred feed items for user {}", userId);
+        return feedItemService.getStaredFeedItem(userId);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<FeedItem> getFeedItemById(@PathVariable String id) {
-        LOGGER.debug("Getting feed item for feed item ID {}", id);
-        return feedItemService.getFeedItemById(id)
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Getting feed item for feed item ID {} and user {}", id, userId);
+        return feedItemService.getFeedItemById(id, userId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -51,51 +57,56 @@ public class FeedItemController {
     // GET /api/feed-items/for-feed/{feedId} - Retrieve feed items for a specific feed
     @GetMapping("/for-feed/{feedId}")
     public List<FeedItem> getFeedItemsForFeed(@PathVariable String feedId) {
-        LOGGER.debug("Getting feed items for feed ID {}", feedId);
-        return feedItemService.getFeedItemsByFeedId(feedId);
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Getting feed items for feed ID {} and user {}", feedId, userId);
+        return feedItemService.getFeedItemsByFeedId(feedId, userId);
     }
 
     @GetMapping("/for-feed/{feedId}/unread")
     public List<FeedItem> getUnreadFeedItemsForFeed(@PathVariable String feedId) {
-        LOGGER.debug("Getting Unread feed items for feed ID {}", feedId);
-        return feedItemService.getUnreadFeedItemsByFeedId(feedId);
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Getting Unread feed items for feed ID {} and user {}", feedId, userId);
+        return feedItemService.getUnreadFeedItemsByFeedId(feedId, userId);
     }
 
     @GetMapping("/for-feed/{feedId}/starred")
     public List<FeedItem> getStaredFeedItemsForFeed(@PathVariable String feedId) {
-        LOGGER.debug("Getting starred feed items for feed ID {}", feedId);
-        return feedItemService.getStaredFeedItemsByFeedId(feedId);
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Getting starred feed items for feed ID {} and user {}", feedId, userId);
+        return feedItemService.getStaredFeedItemsByFeedId(feedId, userId);
     }
 
     @PatchMapping("/{id}/mark-read")
     public ResponseEntity<FeedItem> markFeedRead(@PathVariable String id) {
-        LOGGER.debug("Marking feed item {} as read", id);
-        return feedItemService.markFeedRead(id)
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Marking feed item {} as read for user {}", id, userId);
+        return feedItemService.markFeedRead(id, userId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}/toggle-star")
     public ResponseEntity<FeedItem> toggleFeedIemStar(@PathVariable String id) {
-        LOGGER.debug("Toggling star for feed item {}", id);
-        return feedItemService.toggleFeedIemStar(id)
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Toggling star for feed item {} for user {}", id, userId);
+        return feedItemService.toggleFeedIemStar(id, userId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}/resummarize")
     public reactor.core.publisher.Mono<ResponseEntity<String>> resummarizeFeedItem(@PathVariable String id) {
-        LOGGER.debug("Resummarizing feed item {}", id);
-        return feedItemService.resummarizeFeedItem(id)
-                .map(ResponseEntity::ok)
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Resummarizing feed item {} for user {}", id, userId);
+        return feedItemService.resummarizeFeedItem(id, userId)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}/retag")
     public reactor.core.publisher.Mono<ResponseEntity<List<String>>> retagFeedItem(@PathVariable String id) {
-        LOGGER.debug("Retagging feed item {}", id);
-        return feedItemService.retagFeedItem(id)
-                .map(ResponseEntity::ok)
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Retagging feed item {} for user {}", id, userId);
+        return feedItemService.retagFeedItem(id, userId)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 

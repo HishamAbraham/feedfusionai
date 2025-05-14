@@ -9,8 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @RestController
 @RequestMapping("/api/feeds")
@@ -27,42 +29,49 @@ public class FeedController {
     // GET /api/feeds - Retrieve all feeds
     @GetMapping
     public List<Feed> getAllFeeds() {
-        LOGGER.debug("Getting feed all feeds");
-        return feedService.getAllFeeds();
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Getting all feeds for user {}", userId);
+        return feedService.getFeedsByUser(userId);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Feed> getFeedById(@PathVariable String id) {
-        LOGGER.debug("Getting feed for id {}", id);
-        return feedService.getFeedById(id)
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Getting feed for id {} and user {}", id, userId);
+        return feedService.getFeedById(id, userId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public ResponseEntity<Feed> createFeed(@RequestBody Feed feed) {
-        final Feed created = feedService.addFeed(feed);
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        feed.setOwnerId(userId);
+        final Feed created = feedService.addFeed(feed, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Feed> patchFeed(@PathVariable String id, @RequestBody Map<String, Object> updates) {
-        LOGGER.debug("Patching feed id {} with, {}", id, updates);
-        return feedService.patchFeed(id, updates)
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Patching feed id {} for user {} with {}", id, userId, updates);
+        return feedService.patchFeed(id, userId, updates)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFeed(@PathVariable String id) {
-        LOGGER.debug("Deleting feed id {}", id);
-        feedService.deleteFeed(id);
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.debug("Deleting feed id {} for user {}", id, userId);
+        feedService.deleteFeed(id, userId);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/refresh")
     public ResponseEntity<Integer> refreshFeeds() {
-        final int added = feedScannerService.scanFeeds();
+        final String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        final int added = feedScannerService.scanFeeds(Optional.of(userId));
         return ResponseEntity.ok(added);
     }
 }
