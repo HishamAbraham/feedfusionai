@@ -41,7 +41,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        ResponseEntity<?> response;
+        final ResponseEntity<?> response;
         final var userOpt = userService.login(request.getEmail(), request.getPassword());
         if (userOpt.isPresent()) {
             final User user = userOpt.get();
