@@ -35,6 +35,7 @@ spotbugs {
     toolVersion = '4.7.3'
     effort = 'max'
     reportLevel = 'low'
+    excludeFilter = file("config/spotbugs/excludeFilter.xml")
 }
 
 configurations.all {
