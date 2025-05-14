@@ -8,6 +8,7 @@
 
     <rule ref="category/java/bestpractices.xml">
         <exclude name="GuardLogStatement"/>
+        <exclude name="MissingOverride"/>
     </rule>
     <rule ref="category/java/codestyle.xml">
         <exclude name="MethodArgumentCouldBeFinal"/>

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class FeedScannerService {
@@ -53,9 +54,10 @@ public class FeedScannerService {
         this.aiService          = Objects.requireNonNull(aiService);
     }
 
-    public int scanFeeds() {
+    public int scanFeeds(Optional<String> userId) {
         int newCount = 0;
-        final List<Feed> feeds = feedRepository.findAll();
+        final List<Feed> feeds = userId.map(feedRepository::findByOwnerId)
+                                       .orElseGet(feedRepository::findAll);
         for (Feed f : feeds) {
             try {
                 // 1) Fetch raw content + inspect headers
@@ -94,6 +96,7 @@ public class FeedScannerService {
                 for (FeedItem item : items) {
                     if (!feedItemRepository.existsByFeedLinkAndFeedId(item.getFeedLink(), f.getId())) {
                         item.setFeedId(f.getId());
+                        item.setOwnerId(f.getOwnerId()); // assign ownership
                         item.setRead(false);
                         feedItemRepository.save(item);
                         newCount++;
@@ -112,6 +115,7 @@ public class FeedScannerService {
         }
         return newCount;
     }
+
 
     /** Heuristic: does this string look like an HTML page? */
     private boolean looksLikeHtml(String s) {

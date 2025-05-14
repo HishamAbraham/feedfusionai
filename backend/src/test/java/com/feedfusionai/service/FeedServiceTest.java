@@ -44,13 +44,13 @@ class FeedServiceTest {
         updates.put("url", "http://new.url");
         updates.put("lastFetched", "2025-04-06T00:00:00Z");
 
-        // Set up the repository mock: when findById is called with "1", return the oldFeed.
-        when(feedRepository.findById("1")).thenReturn(Optional.of(oldFeed));
+        // Set up the repository mock: when findByIdAndOwnerId is called with "1" and "test-user", return the oldFeed.
+        when(feedRepository.findByIdAndOwnerId("1", "test-user")).thenReturn(Optional.of(oldFeed));
         // When save is called, return the feed being saved.
         when(feedRepository.save(any(Feed.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Call the patchFeed method.
-        Optional<Feed> updatedOpt = feedService.patchFeed("1", updates);
+        Optional<Feed> updatedOpt = feedService.patchFeed("1", "test-user", updates);
         assertTrue(updatedOpt.isPresent());
         Feed updatedFeed = updatedOpt.get();
 

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 @Component
 public class FeedAutoRefreshScheduler {
 
@@ -21,7 +23,7 @@ public class FeedAutoRefreshScheduler {
     @Scheduled(fixedRateString = "${feedfusionai.feed-refresh-interval-ms:3600000}")
     public void autoRefreshFeeds() {
         LOGGER.info("Starting scheduled feed scan...");
-        feedScannerService.scanFeeds(); // Ensure this method exists in FeedService
+        feedScannerService.scanFeeds(Optional.empty()); // Ensure this method exists in FeedService
         LOGGER.info("Scheduled feed scan complete.");
     }
 }

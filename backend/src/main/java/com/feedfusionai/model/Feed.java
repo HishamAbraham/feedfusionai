@@ -22,6 +22,7 @@ public class Feed {
     private String url;
     private String imageUrl;
     private Instant lastFetched;
+    private String ownerId;
     @Transient
     private long unreadCount;
 }

@@ -17,4 +17,11 @@ public interface FeedItemRepository extends MongoRepository<FeedItem, String> {
     /** true if an item with this feedLink already exists for this feedId */
     boolean existsByFeedLinkAndFeedId(String feedLink, String feedId);
 
+    // User-scoped queries
+    List<FeedItem> findByFeedIdAndOwnerId(String feedId, String ownerId);
+    List<FeedItem> findByFeedIdAndReadFalseAndOwnerId(String feedId, String ownerId);
+    List<FeedItem> findByReadFalseAndOwnerId(String ownerId);
+    List<FeedItem> findByStarredTrueAndOwnerId(String ownerId);
+    List<FeedItem> findByFeedIdAndStarredTrueAndOwnerId(String feedId, String ownerId);
+    Optional<FeedItem> findByIdAndOwnerId(String id, String ownerId);
 }

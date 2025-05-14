@@ -34,21 +34,21 @@ public class FeedService {
     private FeedItemRepository feedItemRepository;
 
 
-    public List<Feed> getAllFeeds() {
-        final List<Feed> feeds = feedRepository.findAll();
+    public List<Feed> getFeedsByUser(String userId) {
+        final List<Feed> feeds = feedRepository.findByOwnerId(userId);
         for (Feed feed : feeds) {
             feed.setUnreadCount(feedItemRepository.countByFeedIdAndReadFalse(feed.getId()));
         }
         return feeds;
     }
 
-    public Optional<Feed> getFeedById(String id) {
-        final Optional<Feed> feed = feedRepository.findById(id);
+    public Optional<Feed> getFeedById(String id, String userId) {
+        final Optional<Feed> feed = feedRepository.findByIdAndOwnerId(id, userId);
         feed.ifPresent(value -> value.setUnreadCount(feedItemRepository.countByFeedIdAndReadFalse(value.getId())));
         return feed;
     }
 
-    public Feed addFeed(Feed feed) {
+    public Feed addFeed(Feed feed, String userId) {
         // 1) Fetch metadata from the URL
         try {
             final URL feedUrl = new URL(feed.getUrl());
@@ -73,7 +73,6 @@ public class FeedService {
             // 2) Populate your Feed entity
             feed.setTitle(syndFeed.getTitle());
             feed.setDescription(syndFeed.getDescription());
-            feed.setUrl(syndFeed.getLink());
 
             if (syndFeed.getImage() != null) {
                 feed.setImageUrl(syndFeed.getImage().getUrl());
@@ -85,13 +84,15 @@ public class FeedService {
             throw new RuntimeException("Failed to retrieve feed metadata from " + feed.getUrl(), e);
         }
 
+        // Set the ownerId before saving
+        feed.setOwnerId(userId);
         // 3) Save to MongoDB
         return feedRepository.save(feed);
     }
 
-    // Method to update specific fields using PATCH
-    public Optional<Feed> patchFeed(String id, Map<String, Object> updates) {
-        final Optional<Feed> optionalFeed = feedRepository.findById(id);
+    // Method to update specific fields using PATCH, scoped by userId
+    public Optional<Feed> patchFeed(String id, String userId, Map<String, Object> updates) {
+        final Optional<Feed> optionalFeed = feedRepository.findByIdAndOwnerId(id, userId);
         Optional<Feed> result = Optional.empty();
         if (optionalFeed.isPresent()) {
             final Feed feed = optionalFeed.get();
@@ -103,7 +104,6 @@ public class FeedService {
                 feed.setUrl((String) updates.get("url"));
             }
             if (updates.containsKey("lastFetched")) {
-                // Assuming ISO-8601 String representation; convert to Instant.
                 feed.setLastFetched(Instant.parse((String) updates.get("lastFetched")));
             }
 
@@ -112,11 +112,12 @@ public class FeedService {
         return result;
     }
 
-    public void deleteFeed(String id) {
-        // 1) remove all items for that feed
-        feedItemRepository.deleteByFeedId(id);
-        // 2) then delete the feed itself
-        feedRepository.deleteById(id);
+    public void deleteFeed(String id, String userId) {
+        final Optional<Feed> feed = feedRepository.findByIdAndOwnerId(id, userId);
+        feed.ifPresent(value -> {
+            feedItemRepository.deleteByFeedId(value.getId());
+            feedRepository.deleteById(value.getId());
+        });
     }
 
     private static class NonValidatingXmlReaderFactory implements org.jdom2.input.sax.XMLReaderJDOMFactory {
