@@ -3,6 +3,7 @@ package com.feedfusionai.controller;
 import com.feedfusionai.model.LoginRequest;
 import com.feedfusionai.model.User;
 import com.feedfusionai.service.UserService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +18,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 @RestController
 @RequestMapping("/api/users")
+@SuppressFBWarnings("EI2")
 public class UserController {
 
     private final UserService userService;

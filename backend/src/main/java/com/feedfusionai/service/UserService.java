@@ -2,6 +2,7 @@ package com.feedfusionai.service;
 
 import com.feedfusionai.model.User;
 import com.feedfusionai.repository.UserRepository;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@SuppressFBWarnings("EI2")
 public class UserService {
 
     private final UserRepository userRepository;
@@ -16,6 +18,12 @@ public class UserService {
 
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        if (userRepository == null) {
+            throw new IllegalArgumentException("userRepository must not be null");
+        }
+        if (passwordEncoder == null) {
+            throw new IllegalArgumentException("passwordEncoder must not be null");
+        }
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
