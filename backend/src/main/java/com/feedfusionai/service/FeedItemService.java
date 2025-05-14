@@ -1,14 +1,13 @@
 package com.feedfusionai.service;
 import com.feedfusionai.model.FeedItem;
 import com.feedfusionai.repository.FeedItemRepository;
-import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Arrays;
 
 @Service
 public class FeedItemService {
@@ -93,13 +92,13 @@ public class FeedItemService {
         feedItemRepository.deleteById(id);
     }
 
-    public reactor.core.publisher.Mono<org.springframework.http.ResponseEntity<String>> resummarizeFeedItem(String id, String userId) {
+    public Mono<ResponseEntity<String>> resummarizeFeedItem(String id, String userId) {
         // Implementation stub for consistency; actual implementation may vary
-        return Mono.just(org.springframework.http.ResponseEntity.ok("Resummarize feature not implemented yet"));
+        return Mono.just(ResponseEntity.ok("Resummarize feature not implemented yet"));
     }
 
-    public reactor.core.publisher.Mono<org.springframework.http.ResponseEntity<List<String>>> retagFeedItem(String id, String userId) {
+    public Mono<ResponseEntity<List<String>>> retagFeedItem(String id, String userId) {
         // Implementation stub for consistency; actual implementation may vary
-        return Mono.just(org.springframework.http.ResponseEntity.ok(List.of()));
+        return Mono.just(ResponseEntity.ok(List.of()));
     }
 }

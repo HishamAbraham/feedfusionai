@@ -18,9 +18,11 @@ import java.util.Collections;
 
 public class JwtAuthFilter extends OncePerRequestFilter {
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(JwtAuthFilter.class);
     private final SecretKey secretKey;
 
     public JwtAuthFilter(SecretKey secretKey) {
+        super(); // Call to super constructor
         this.secretKey = secretKey;
     }
 
@@ -48,7 +50,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
-                // Optionally log or handle invalid token
+                LOGGER.warn("Invalid JWT token: {}", e.getMessage());
             }
         }
 
